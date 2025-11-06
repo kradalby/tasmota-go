@@ -14,7 +14,37 @@ func newNetworkCmd(host, username, password *string, timeout *time.Duration, deb
 	return &ffcli.Command{
 		Name:       "network",
 		ShortUsage: "tasmota network <subcommand>",
-		ShortHelp:  "Network configuration",
+		ShortHelp:  "Network configuration and diagnostics",
+		LongHelp: `Configure network settings on Tasmota devices.
+
+Network commands allow you to:
+  - View current network configuration (IP, hostname, DHCP status)
+  - Set device hostname
+  - Configure static IP address or enable DHCP
+  - Test connectivity by pinging hosts from the device
+
+Note: Network changes may require a device restart to take full effect.
+The device may also change IP addresses if switching between DHCP and static.
+
+Examples:
+  # View current network configuration
+  tasmota --host 192.168.1.100 network get
+
+  # Set hostname
+  tasmota --host 192.168.1.100 network set-hostname --hostname tasmota-bedroom
+
+  # Configure static IP
+  tasmota --host 192.168.1.100 network set-static-ip \
+    --ip 192.168.1.50 \
+    --gateway 192.168.1.1 \
+    --subnet 255.255.255.0 \
+    --dns 8.8.8.8
+
+  # Enable DHCP
+  tasmota --host 192.168.1.100 network set-dhcp
+
+  # Test connectivity
+  tasmota --host 192.168.1.100 network ping --target 8.8.8.8`,
 		Subcommands: []*ffcli.Command{
 			newNetworkGetCmd(host, username, password, timeout, debug),
 			newNetworkSetHostnameCmd(host, username, password, timeout, debug),
@@ -98,9 +128,28 @@ func newNetworkSetStaticIPCmd(host, username, password *string, timeout *time.Du
 
 	return &ffcli.Command{
 		Name:       "set-static-ip",
-		ShortUsage: "tasmota network set-static-ip --ip <ip> --gateway <gw> --subnet <mask>",
-		ShortHelp:  "Configure static IP",
-		FlagSet:    fs,
+		ShortUsage: "tasmota network set-static-ip --ip <ip> --gateway <gw> --subnet <mask> [--dns <dns>]",
+		ShortHelp:  "Configure static IP address",
+		LongHelp: `Configure a static IP address for the Tasmota device.
+
+This disables DHCP and sets a fixed IP address. You must provide:
+  - IP address for the device
+  - Gateway address (usually your router)
+  - Subnet mask (usually 255.255.255.0)
+
+Optionally, you can specify a DNS server. If not provided, the device
+will use the DNS server from DHCP or previous configuration.
+
+Warning: If you set an incorrect IP configuration, you may lose network
+connectivity to the device. Ensure your settings are correct before applying.
+
+Example:
+  tasmota --host 192.168.1.100 network set-static-ip \
+    --ip 192.168.1.50 \
+    --gateway 192.168.1.1 \
+    --subnet 255.255.255.0 \
+    --dns 8.8.8.8`,
+		FlagSet: fs,
 		Exec: func(ctx context.Context, args []string) error {
 			if *ip == "" || *gateway == "" || *subnet == "" {
 				return fmt.Errorf("--ip, --gateway, and --subnet are required")
@@ -183,7 +232,26 @@ func newNetworkPingCmd(host, username, password *string, timeout *time.Duration,
 		Name:       "ping",
 		ShortUsage: "tasmota network ping [--target <host>]",
 		ShortHelp:  "Ping a host from the device",
-		FlagSet:    fs,
+		LongHelp: `Test network connectivity by pinging a host from the Tasmota device.
+
+This command instructs the device to ping a target host and reports whether
+the ping was successful. This is useful for:
+  - Verifying the device has internet connectivity
+  - Testing if the device can reach specific hosts
+  - Diagnosing network issues
+
+The target can be an IP address or hostname. Default is 8.8.8.8 (Google DNS).
+
+Examples:
+  # Ping Google DNS (default)
+  tasmota --host 192.168.1.100 network ping
+
+  # Ping your router
+  tasmota --host 192.168.1.100 network ping --target 192.168.1.1
+
+  # Ping a hostname
+  tasmota --host 192.168.1.100 network ping --target mqtt.home`,
+		FlagSet: fs,
 		Exec: func(ctx context.Context, args []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {

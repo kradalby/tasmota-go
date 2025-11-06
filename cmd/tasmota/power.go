@@ -14,7 +14,27 @@ func newPowerCmd(host, username, password *string, timeout *time.Duration, debug
 	return &ffcli.Command{
 		Name:       "power",
 		ShortUsage: "tasmota power <subcommand>",
-		ShortHelp:  "Control device power",
+		ShortHelp:  "Control device power (relays)",
+		LongHelp: `Control power relays on Tasmota devices.
+
+Tasmota devices can have up to 8 relays. Use --relay to specify which relay
+to control (1-8). Relay 1 is the default. Use --relay 0 to control all relays.
+
+Examples:
+  # Turn on relay 1 (default)
+  tasmota --host 192.168.1.100 power on
+
+  # Turn off relay 2
+  tasmota --host 192.168.1.100 power off --relay 2
+
+  # Toggle relay 3
+  tasmota --host 192.168.1.100 power toggle --relay 3
+
+  # Get current state of relay 1
+  tasmota --host 192.168.1.100 power get
+
+  # Turn on all relays
+  tasmota --host 192.168.1.100 power on --relay 0`,
 		Subcommands: []*ffcli.Command{
 			newPowerOnCmd(host, username, password, timeout, debug),
 			newPowerOffCmd(host, username, password, timeout, debug),
