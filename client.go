@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -25,7 +26,7 @@ type Client struct {
 	httpClient *http.Client
 	username   string
 	password   string
-	debug      bool
+	logger     *slog.Logger
 }
 
 // ClientOption is a functional option for configuring the Client.
@@ -53,10 +54,11 @@ func WithHTTPClient(client *http.Client) ClientOption {
 	}
 }
 
-// WithDebug enables debug logging for requests and responses.
-func WithDebug(debug bool) ClientOption {
+// WithLogger sets a custom slog.Logger for request/response logging.
+// If not set, no logging will be performed.
+func WithLogger(logger *slog.Logger) ClientOption {
 	return func(c *Client) {
-		c.debug = debug
+		c.logger = logger
 	}
 }
 
@@ -153,12 +155,19 @@ func (c *Client) do(ctx context.Context, urlStr string) ([]byte, error) {
 
 	req.Header.Set("User-Agent", UserAgent)
 
-	if c.debug {
-		fmt.Printf("DEBUG: GET %s\n", urlStr)
+	if c.logger != nil {
+		c.logger.Debug("sending request",
+			"method", req.Method,
+			"url", urlStr)
 	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		if c.logger != nil {
+			c.logger.Error("request failed",
+				"url", urlStr,
+				"error", err)
+		}
 		// Check if it's a timeout
 		if ctx.Err() == context.DeadlineExceeded {
 			return nil, NewError(ErrorTypeTimeout, "request timeout", err)
@@ -171,12 +180,18 @@ func (c *Client) do(ctx context.Context, urlStr string) ([]byte, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		if c.logger != nil {
+			c.logger.Error("failed to read response body",
+				"error", err)
+		}
 		return nil, NewError(ErrorTypeNetwork, "failed to read response", err)
 	}
 
-	if c.debug {
-		fmt.Printf("DEBUG: Response status: %d\n", resp.StatusCode)
-		fmt.Printf("DEBUG: Response body: %s\n", string(body))
+	if c.logger != nil {
+		c.logger.Debug("received response",
+			"status_code", resp.StatusCode,
+			"body_length", len(body),
+			"body", string(body))
 	}
 
 	// Check for HTTP errors
