@@ -40,10 +40,10 @@ func TestClient_GetNetworkConfig(t *testing.T) {
 	if config.Hostname != "tasmota-test" {
 		t.Errorf("Hostname = %v, want tasmota-test", config.Hostname)
 	}
-	if config.IPAddress != "192.168.1.100" {
+	if config.IPAddress.String() != "192.168.1.100" {
 		t.Errorf("IPAddress = %v, want 192.168.1.100", config.IPAddress)
 	}
-	if config.Gateway != "192.168.1.1" {
+	if config.Gateway.String() != "192.168.1.1" {
 		t.Errorf("Gateway = %v, want 192.168.1.1", config.Gateway)
 	}
 }
@@ -133,9 +133,13 @@ func TestClient_SetStaticIP(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			ip, _ := NewIPAddr(tt.ip)
+			gateway, _ := NewIPAddr(tt.gateway)
+			subnet, _ := NewIPAddr(tt.subnet)
+
 			if tt.wantErr {
 				client := &Client{}
-				err := client.SetStaticIP(context.Background(), tt.ip, tt.gateway, tt.subnet)
+				err := client.SetStaticIP(context.Background(), ip, gateway, subnet)
 				if err == nil {
 					t.Error("SetStaticIP() expected error, got nil")
 				}
@@ -157,7 +161,7 @@ func TestClient_SetStaticIP(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.SetStaticIP(context.Background(), tt.ip, tt.gateway, tt.subnet)
+			err := client.SetStaticIP(context.Background(), ip, gateway, subnet)
 			if err != nil {
 				t.Errorf("SetStaticIP() error: %v", err)
 			}
@@ -209,9 +213,11 @@ func TestClient_SetDNSServer(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			dnsServer, _ := NewIPAddr(tt.dnsServer)
+
 			if tt.wantErr {
 				client := &Client{}
-				err := client.SetDNSServer(context.Background(), tt.dnsServer)
+				err := client.SetDNSServer(context.Background(), dnsServer)
 				if err == nil {
 					t.Error("SetDNSServer() expected error, got nil")
 				}
@@ -229,7 +235,7 @@ func TestClient_SetDNSServer(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.SetDNSServer(context.Background(), tt.dnsServer)
+			err := client.SetDNSServer(context.Background(), dnsServer)
 			if err != nil {
 				t.Errorf("SetDNSServer() error: %v", err)
 			}
@@ -412,10 +418,10 @@ func TestClient_SetNetworkConfig(t *testing.T) {
 			name: "full static config",
 			config: &NetworkConfig{
 				Hostname:  "tasmota",
-				IPAddress: "192.168.1.100",
-				Gateway:   "192.168.1.1",
-				Subnet:    "255.255.255.0",
-				DNSServer: "8.8.8.8",
+				IPAddress: MustParseIPAddr("192.168.1.100"),
+				Gateway:   MustParseIPAddr("192.168.1.1"),
+				Subnet:    MustParseIPAddr("255.255.255.0"),
+				DNSServer: MustParseIPAddr("8.8.8.8"),
 				SSID1:     "WiFi1",
 				Password1: "pass1",
 			},
@@ -440,13 +446,13 @@ func TestClient_SetNetworkConfig(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "invalid IP",
+			name: "partial IP config",
 			config: &NetworkConfig{
-				IPAddress: "invalid",
-				Gateway:   "192.168.1.1",
-				Subnet:    "255.255.255.0",
+				IPAddress: MustParseIPAddr("192.168.1.100"),
+				Gateway:   MustParseIPAddr("192.168.1.1"),
+				Subnet:    MustParseIPAddr("255.255.255.0"),
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "hostname too long",
@@ -517,16 +523,16 @@ func TestClient_GetIPConfig(t *testing.T) {
 		t.Fatalf("GetIPConfig() error: %v", err)
 	}
 
-	if ip != "192.168.1.100" {
+	if ip.String() != "192.168.1.100" {
 		t.Errorf("IP = %v, want 192.168.1.100", ip)
 	}
-	if gateway != "192.168.1.1" {
+	if gateway.String() != "192.168.1.1" {
 		t.Errorf("Gateway = %v, want 192.168.1.1", gateway)
 	}
-	if subnet != "255.255.255.0" {
+	if subnet.String() != "255.255.255.0" {
 		t.Errorf("Subnet = %v, want 255.255.255.0", subnet)
 	}
-	if dns != "192.168.1.1" {
+	if dns.String() != "192.168.1.1" {
 		t.Errorf("DNS = %v, want 192.168.1.1", dns)
 	}
 }
@@ -554,7 +560,7 @@ func TestClient_GetMACAddress(t *testing.T) {
 		t.Fatalf("GetMACAddress() error: %v", err)
 	}
 
-	if mac != "AA:BB:CC:DD:EE:FF" {
+	if mac.String() != "aa:bb:cc:dd:ee:ff" {
 		t.Errorf("MAC = %v, want AA:BB:CC:DD:EE:FF", mac)
 	}
 }

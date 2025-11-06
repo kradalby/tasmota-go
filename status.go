@@ -42,29 +42,32 @@ type StatusInfo struct {
 	PowerRetain  int      `json:"PowerRetain"`
 }
 
+// EthernetInfo contains ethernet interface information.
+type EthernetInfo struct {
+	Hostname   string   `json:"Hostname"`
+	IPAddress  []IPAddr `json:"IPAddress"`
+	Gateway    IPAddr   `json:"Gateway"`
+	Subnetmask IPAddr   `json:"Subnetmask"`
+	DNSServer  IPAddr   `json:"DNSServer"`
+	Mac        MACAddr  `json:"Mac"`
+}
+
 // StatusParam contains device parameters (Status 2).
 type StatusParam struct {
-	Hostname    string   `json:"Hostname"`
-	IPAddress   []string `json:"IPAddress"`
-	Gateway     string   `json:"Gateway"`
-	Subnetmask  string   `json:"Subnetmask"`
-	DNSServer   string   `json:"DNSServer"`
-	Mac         string   `json:"Mac"`
-	Ethernet    *struct {
-		Hostname   string   `json:"Hostname"`
-		IPAddress  []string `json:"IPAddress"`
-		Gateway    string   `json:"Gateway"`
-		Subnetmask string   `json:"Subnetmask"`
-		DNSServer  string   `json:"DNSServer"`
-		Mac        string   `json:"Mac"`
-	} `json:"Ethernet,omitempty"`
-	WebServer   int    `json:"WebServer"`
-	WebPassword int    `json:"WebPassword"`
-	Sleep       int    `json:"Sleep"`
-	BootCount   int    `json:"BootCount"`
-	BCResetTime string `json:"BCResetTime"`
-	SaveCount   int    `json:"SaveCount"`
-	SaveAddress string `json:"SaveAddress"`
+	Hostname    string        `json:"Hostname"`
+	IPAddress   []IPAddr      `json:"IPAddress"`
+	Gateway     IPAddr        `json:"Gateway"`
+	Subnetmask  IPAddr        `json:"Subnetmask"`
+	DNSServer   IPAddr        `json:"DNSServer"`
+	Mac         MACAddr       `json:"Mac"`
+	Ethernet    *EthernetInfo `json:"Ethernet,omitempty"`
+	WebServer   int           `json:"WebServer"`
+	WebPassword int           `json:"WebPassword"`
+	Sleep       int           `json:"Sleep"`
+	BootCount   int           `json:"BootCount"`
+	BCResetTime string        `json:"BCResetTime"`
+	SaveCount   int           `json:"SaveCount"`
+	SaveAddress string        `json:"SaveAddress"`
 }
 
 // StatusFirmware contains firmware information (Status 2).
@@ -118,12 +121,12 @@ type StatusMemory struct {
 // StatusNetwork contains network information (Status 5).
 type StatusNetwork struct {
 	Hostname   string  `json:"Hostname"`
-	IPAddress  string  `json:"IPAddress"`
-	Gateway    string  `json:"Gateway"`
-	Subnetmask string  `json:"Subnetmask"`
-	DNSServer  string  `json:"DNSServer"`
-	DNSServer2 string  `json:"DNSServer2"`
-	Mac        string  `json:"Mac"`
+	IPAddress  IPAddr  `json:"IPAddress"`
+	Gateway    IPAddr  `json:"Gateway"`
+	Subnetmask IPAddr  `json:"Subnetmask"`
+	DNSServer  IPAddr  `json:"DNSServer"`
+	DNSServer2 IPAddr  `json:"DNSServer2"`
+	Mac        MACAddr `json:"Mac"`
 	Webserver  int     `json:"Webserver"`
 	HTTPAPI    int     `json:"HTTP_API"` //nolint:revive // Tasmota API field name
 	WifiConfig int     `json:"WifiConfig"`

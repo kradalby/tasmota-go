@@ -247,10 +247,10 @@ func TestClient_GetNetworkInfo(t *testing.T) {
 	if info.Hostname != "tasmota-test" {
 		t.Errorf("Hostname = %v, want tasmota-test", info.Hostname)
 	}
-	if info.IPAddress != "192.168.1.100" {
+	if info.IPAddress.String() != "192.168.1.100" {
 		t.Errorf("IPAddress = %v, want 192.168.1.100", info.IPAddress)
 	}
-	if info.Mac != "AA:BB:CC:DD:EE:FF" {
+	if info.Mac.String() != "aa:bb:cc:dd:ee:ff" {
 		t.Errorf("Mac = %v, want AA:BB:CC:DD:EE:FF", info.Mac)
 	}
 	if info.WifiPower != 17.0 {
