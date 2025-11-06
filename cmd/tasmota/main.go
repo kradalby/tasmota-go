@@ -32,6 +32,7 @@ func main() {
 			newPowerCmd(host, username, password, timeout, debug),
 			newInfoCmd(host, username, password, timeout, debug),
 			newNetworkCmd(host, username, password, timeout, debug),
+			newMQTTCmd(host, username, password, timeout, debug),
 		},
 		Exec: func(ctx context.Context, args []string) error {
 			return flag.ErrHelp
