@@ -10,8 +10,8 @@ import (
 type DeviceConfig struct {
 	FriendlyName []string
 	DeviceName   string
-	PowerOnState int
-	LedState     int
+	PowerOnState PowerOnState
+	LedState     LedState
 	Sleep        int
 	ButtonRetain int
 	SwitchRetain int
@@ -29,8 +29,8 @@ func (c *Client) GetConfig(ctx context.Context) (*DeviceConfig, error) {
 	config := &DeviceConfig{
 		FriendlyName: info.FriendlyName,
 		DeviceName:   info.DeviceName,
-		PowerOnState: info.PowerOnState,
-		LedState:     info.LedState,
+		PowerOnState: PowerOnState(info.PowerOnState),
+		LedState:     LedState(info.LedState),
 		ButtonRetain: info.ButtonRetain,
 		SwitchRetain: info.SwitchRetain,
 		SensorRetain: info.SensorRetain,
@@ -69,14 +69,8 @@ func (c *Client) SetFriendlyNameN(ctx context.Context, index int, name string) e
 }
 
 // SetPowerOnState sets the power state on boot.
-// Values:
-//   0 = Keep relay off after power on
-//   1 = Turn relay on after power on
-//   2 = Toggle relay after power on
-//   3 = Set relay to last saved state after power on (default)
-//   4 = Turn relay on and disable further relay control
-//   5 = After a PulseTime period turn relay on (acts as inverted PulseTime mode)
-func (c *Client) SetPowerOnState(ctx context.Context, state int) error {
+// Use one of the PowerOnState* constants (PowerOnStateOff, PowerOnStateOn, etc.).
+func (c *Client) SetPowerOnState(ctx context.Context, state PowerOnState) error {
 	if state < 0 || state > 5 {
 		return NewError(ErrorTypeCommand, "power on state must be between 0 and 5", nil)
 	}
@@ -86,17 +80,8 @@ func (c *Client) SetPowerOnState(ctx context.Context, state int) error {
 }
 
 // SetLedState sets the LED state.
-// Values:
-//   0 = Disable use of LED as much as possible
-//   1 = Show power state on LED (default)
-//   2 = Show MQTT subscriptions as a LED blink
-//   3 = Show power state and MQTT subscriptions as a LED blink
-//   4 = Show MQTT publications as a LED blink
-//   5 = Show power state and MQTT publications as a LED blink
-//   6 = Show all MQTT messages as a LED blink
-//   7 = Show power state and MQTT messages as a LED blink
-//   8 = LED on when Wi-Fi and MQTT are connected
-func (c *Client) SetLedState(ctx context.Context, state int) error {
+// Use one of the LedState* constants (LedStateOff, LedStatePower, etc.).
+func (c *Client) SetLedState(ctx context.Context, state LedState) error {
 	if state < 0 || state > 8 {
 		return NewError(ErrorTypeCommand, "LED state must be between 0 and 8", nil)
 	}
@@ -225,8 +210,8 @@ func (c *Client) ApplyConfig(ctx context.Context, cfg *DeviceConfig) error {
 }
 
 // Restart restarts the device.
-// reason: 1 = normal restart, 99 = reset to firmware defaults
-func (c *Client) Restart(ctx context.Context, reason int) error {
+// Use one of the RestartReason* constants (RestartReasonNormal or RestartReasonReset).
+func (c *Client) Restart(ctx context.Context, reason RestartReason) error {
 	if reason != 1 && reason != 99 {
 		return NewError(ErrorTypeCommand, "restart reason must be 1 (normal) or 99 (reset)", nil)
 	}
@@ -236,19 +221,12 @@ func (c *Client) Restart(ctx context.Context, reason int) error {
 }
 
 // Reset resets device configuration to defaults.
-// Values:
-//   1 = Reset relay settings
-//   2 = Reset all settings except Wi-Fi
-//   3 = Reset all settings except Wi-Fi and MQTT
-//   4 = Reset Wi-Fi settings
-//   5 = Erase all flash and reset parameters to firmware defaults but keep Wi-Fi settings
-//   6 = Erase all flash and reset parameters to firmware defaults
-//   99 = Reset device to firmware defaults and reboot (combines Reset 1 and Restart 1)
-func (c *Client) Reset(ctx context.Context, level int) error {
+// Use one of the ResetLevel* constants (ResetLevelRelay, ResetLevelAll, etc.).
+func (c *Client) Reset(ctx context.Context, level ResetLevel) error {
 	validLevels := []int{1, 2, 3, 4, 5, 6, 99}
 	valid := false
 	for _, v := range validLevels {
-		if level == v {
+		if level == ResetLevel(v) {
 			valid = true
 			break
 		}

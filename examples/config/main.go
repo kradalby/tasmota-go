@@ -59,16 +59,16 @@ func main() {
 	}
 	fmt.Println("Friendly name updated")
 
-	// Configure power-on state (3 = restore last state)
+	// Configure power-on state (restore last state)
 	fmt.Println("\nConfiguring power-on state...")
-	if err := client.SetPowerOnState(ctx, 3); err != nil {
+	if err := client.SetPowerOnState(ctx, tasmota.PowerOnStateSaved); err != nil {
 		log.Fatalf("Failed to set power-on state: %v", err)
 	}
 	fmt.Println("Power-on state set to restore last state")
 
-	// Set LED state (1 = show power state)
+	// Set LED state (show power state)
 	fmt.Println("\nConfiguring LED state...")
-	if err := client.SetLedState(ctx, 1); err != nil {
+	if err := client.SetLedState(ctx, tasmota.LedStatePower); err != nil {
 		log.Fatalf("Failed to set LED state: %v", err)
 	}
 	fmt.Println("LED configured to show power state")
@@ -84,8 +84,8 @@ func main() {
 	fmt.Println("\nApplying multiple configuration changes...")
 	deviceConfig := &tasmota.DeviceConfig{
 		FriendlyName: []string{"Bedroom Light"},
-		PowerOnState: 3,
-		LedState:     1,
+		PowerOnState: tasmota.PowerOnStateSaved,
+		LedState:     tasmota.LedStatePower,
 		Sleep:        50,
 	}
 	if err := client.ApplyConfig(ctx, deviceConfig); err != nil {

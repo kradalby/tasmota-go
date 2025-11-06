@@ -333,7 +333,7 @@ func TestClient_SetAPMode(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.wantErr {
 				client := &Client{}
-				err := client.SetAPMode(context.Background(), tt.mode)
+				err := client.SetAPMode(context.Background(), APMode(tt.mode))
 				if err == nil {
 					t.Error("SetAPMode() expected error, got nil")
 				}
@@ -351,7 +351,7 @@ func TestClient_SetAPMode(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.SetAPMode(context.Background(), tt.mode)
+			err := client.SetAPMode(context.Background(), APMode(tt.mode))
 			if err != nil {
 				t.Errorf("SetAPMode() error: %v", err)
 			}
@@ -637,7 +637,7 @@ func TestClient_SetWiFiConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.wantErr {
 				client := &Client{}
-				err := client.SetWiFiConfig(context.Background(), tt.mode)
+				err := client.SetWiFiConfig(context.Background(), WiFiConfigMode(tt.mode))
 				if err == nil {
 					t.Error("SetWiFiConfig() expected error, got nil")
 				}
@@ -655,7 +655,7 @@ func TestClient_SetWiFiConfig(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.SetWiFiConfig(context.Background(), tt.mode)
+			err := client.SetWiFiConfig(context.Background(), WiFiConfigMode(tt.mode))
 			if err != nil {
 				t.Errorf("SetWiFiConfig() error: %v", err)
 			}
