@@ -100,21 +100,39 @@ client.SetPower(ctx, tasmota.PowerOn, 0)
 // Set friendly name
 client.SetFriendlyName(ctx, "Living Room Lamp", 1)
 
-// Configure power-on state (3 = restore last state)
-client.SetPowerOnState(ctx, 3)
+// Configure power-on state using typed constants
+client.SetPowerOnState(ctx, tasmota.PowerOnStateSaved) // Restore last state on boot
 
-// Set LED state (1 = show power state)
-client.SetLedState(ctx, 1)
+// Set LED state using typed constants
+client.SetLedState(ctx, tasmota.LedStatePower) // Show power state on LED
 
 // Apply multiple settings atomically
 config := &tasmota.DeviceConfig{
     FriendlyName: []string{"Bedroom Light"},
-    PowerOnState: 3,
-    LedState:     1,
+    PowerOnState: tasmota.PowerOnStateSaved,
+    LedState:     tasmota.LedStatePower,
     Sleep:        50,
-    TelePeriod:   300,
 }
 client.ApplyConfig(ctx, config)
+
+// Available PowerOnState constants:
+// - PowerOnStateOff: Keep relay off
+// - PowerOnStateOn: Turn relay on
+// - PowerOnStateToggle: Toggle relay
+// - PowerOnStateSaved: Restore last state (default)
+// - PowerOnStateOnLocked: Turn on and disable control
+// - PowerOnStatePulse: Pulse mode
+
+// Available LedState constants:
+// - LedStateOff: Disable LED
+// - LedStatePower: Show power state (default)
+// - LedStateMQTTSub: Show MQTT subscriptions
+// - LedStatePowerMQTTSub: Power + MQTT subscriptions
+// - LedStateMQTTPub: Show MQTT publications
+// - LedStatePowerMQTTPub: Power + MQTT publications
+// - LedStateMQTTAll: Show all MQTT messages
+// - LedStatePowerMQTTAll: Power + all MQTT
+// - LedStateWiFiMQTT: LED on when connected
 ```
 
 ### MQTT Configuration

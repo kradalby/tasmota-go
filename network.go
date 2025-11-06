@@ -144,11 +144,8 @@ func (c *Client) GetSSID(ctx context.Context) ([]string, error) {
 }
 
 // SetAPMode sets the WiFi access point mode.
-// Values:
-//   0 = Disable AP mode
-//   1 = Enable AP mode (default)
-//   2 = Enable AP mode with no authentication
-func (c *Client) SetAPMode(ctx context.Context, mode int) error {
+// Use one of the APMode* constants (APModeDisabled, APModeEnabled, APModeOpen).
+func (c *Client) SetAPMode(ctx context.Context, mode APMode) error {
 	if mode < 0 || mode > 2 {
 		return NewError(ErrorTypeCommand, "AP mode must be 0, 1, or 2", nil)
 	}
@@ -287,14 +284,8 @@ func (c *Client) GetWiFiPower(ctx context.Context) (float64, error) {
 }
 
 // SetWiFiConfig sets the WiFi configuration mode.
-// Values:
-//   0 = WIFI_RESTART: Reset Wi-Fi and restart
-//   1 = WIFI_SMARTCONFIG: Start smart config for 1 minute
-//   2 = WIFI_MANAGER: Start WiFi manager for 3 minutes
-//   3 = WIFI_WPSCONFIG: Start WPS for 1 minute
-//   4 = WIFI_RETRY: Disable Wi-Fi auto-restart
-//   5 = WIFI_WAIT: Enable Wi-Fi auto-restart
-func (c *Client) SetWiFiConfig(ctx context.Context, mode int) error {
+// Use one of the WiFiConfigMode* constants (WiFiConfigRestart, WiFiConfigSmartConfig, etc.).
+func (c *Client) SetWiFiConfig(ctx context.Context, mode WiFiConfigMode) error {
 	if mode < 0 || mode > 5 {
 		return NewError(ErrorTypeCommand, "WiFi config mode must be between 0 and 5", nil)
 	}

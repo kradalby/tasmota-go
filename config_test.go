@@ -178,7 +178,7 @@ func TestClient_SetPowerOnState(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.wantErr {
 				client := &Client{}
-				err := client.SetPowerOnState(context.Background(), tt.state)
+				err := client.SetPowerOnState(context.Background(), PowerOnState(tt.state))
 				if err == nil {
 					t.Error("SetPowerOnState() expected error, got nil")
 				}
@@ -196,7 +196,7 @@ func TestClient_SetPowerOnState(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.SetPowerOnState(context.Background(), tt.state)
+			err := client.SetPowerOnState(context.Background(), PowerOnState(tt.state))
 			if err != nil {
 				t.Errorf("SetPowerOnState() error: %v", err)
 			}
@@ -221,7 +221,7 @@ func TestClient_SetLedState(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.wantErr {
 				client := &Client{}
-				err := client.SetLedState(context.Background(), tt.state)
+				err := client.SetLedState(context.Background(), LedState(tt.state))
 				if err == nil {
 					t.Error("SetLedState() expected error, got nil")
 				}
@@ -239,7 +239,7 @@ func TestClient_SetLedState(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.SetLedState(context.Background(), tt.state)
+			err := client.SetLedState(context.Background(), LedState(tt.state))
 			if err != nil {
 				t.Errorf("SetLedState() error: %v", err)
 			}
@@ -412,7 +412,7 @@ func TestClient_Restart(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.wantErr {
 				client := &Client{}
-				err := client.Restart(context.Background(), tt.reason)
+				err := client.Restart(context.Background(), RestartReason(tt.reason))
 				if err == nil {
 					t.Error("Restart() expected error, got nil")
 				}
@@ -430,7 +430,7 @@ func TestClient_Restart(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.Restart(context.Background(), tt.reason)
+			err := client.Restart(context.Background(), RestartReason(tt.reason))
 			if err != nil {
 				t.Errorf("Restart() error: %v", err)
 			}
@@ -458,7 +458,7 @@ func TestClient_Reset(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.wantErr {
 				client := &Client{}
-				err := client.Reset(context.Background(), tt.level)
+				err := client.Reset(context.Background(), ResetLevel(tt.level))
 				if err == nil {
 					t.Error("Reset() expected error, got nil")
 				}
@@ -476,7 +476,7 @@ func TestClient_Reset(t *testing.T) {
 				httpClient: server.Client(),
 			}
 
-			err := client.Reset(context.Background(), tt.level)
+			err := client.Reset(context.Background(), ResetLevel(tt.level))
 			if err != nil {
 				t.Errorf("Reset() error: %v", err)
 			}
