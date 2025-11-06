@@ -190,11 +190,11 @@ func TestClient_BuildURL(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name:     "simple command",
-			baseURL:  "http://192.168.1.100",
-			command:  "Power",
-			wantURL:  "http://192.168.1.100/cm?cmnd=Power",
-			wantErr:  false,
+			name:    "simple command",
+			baseURL: "http://192.168.1.100",
+			command: "Power",
+			wantURL: "http://192.168.1.100/cm?cmnd=Power",
+			wantErr: false,
 		},
 		{
 			name:     "command with auth",
@@ -206,10 +206,10 @@ func TestClient_BuildURL(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name:     "empty command",
-			baseURL:  "http://192.168.1.100",
-			command:  "",
-			wantErr:  true,
+			name:    "empty command",
+			baseURL: "http://192.168.1.100",
+			command: "",
+			wantErr: true,
 		},
 	}
 

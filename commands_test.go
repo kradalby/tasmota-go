@@ -33,10 +33,10 @@ func TestClient_ExecuteCommand(t *testing.T) {
 			wantErr:    false,
 		},
 		{
-			name:       "empty command",
-			command:    "",
-			wantErr:    true,
-			errType:    ErrorTypeCommand,
+			name:    "empty command",
+			command: "",
+			wantErr: true,
+			errType: ErrorTypeCommand,
 		},
 		{
 			name:       "invalid JSON response",
