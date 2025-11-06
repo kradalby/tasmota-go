@@ -167,14 +167,18 @@ client.SetMQTTConfig(ctx, mqttConfig)
 // Set hostname
 client.SetHostname(ctx, "tasmota-livingroom")
 
-// Configure static IP
-client.SetStaticIP(ctx, "192.168.1.100", "192.168.1.1", "255.255.255.0")
+// Configure static IP (using typed IP addresses)
+ip := tasmota.MustParseIPAddr("192.168.1.100")
+gateway := tasmota.MustParseIPAddr("192.168.1.1")
+subnet := tasmota.MustParseIPAddr("255.255.255.0")
+client.SetStaticIP(ctx, ip, gateway, subnet)
 
 // Enable DHCP
 client.EnableDHCP(ctx, true)
 
 // Set DNS server
-client.SetDNSServer(ctx, "8.8.8.8")
+dns := tasmota.MustParseIPAddr("8.8.8.8")
+client.SetDNSServer(ctx, dns)
 
 // Configure WiFi
 client.SetWiFi(ctx, "MySSID", "password", 1)
@@ -182,10 +186,10 @@ client.SetWiFi(ctx, "MySSID", "password", 1)
 // Apply complete network configuration atomically
 netConfig := &tasmota.NetworkConfig{
     Hostname:  "tasmota-bedroom",
-    IPAddress: "192.168.1.101",
-    Gateway:   "192.168.1.1",
-    Subnet:    "255.255.255.0",
-    DNSServer: "8.8.8.8",
+    IPAddress: tasmota.MustParseIPAddr("192.168.1.101"),
+    Gateway:   tasmota.MustParseIPAddr("192.168.1.1"),
+    Subnet:    tasmota.MustParseIPAddr("255.255.255.0"),
+    DNSServer: tasmota.MustParseIPAddr("8.8.8.8"),
     SSID1:     "MySSID",
     Password1: "password",
     UseDHCP:   false,
@@ -260,11 +264,12 @@ fmt.Printf("Power: %.2fW, Voltage: %.2fV, Current: %.3fA\n",
 
 - `GetNetworkConfig(ctx) (*NetworkConfig, error)`
 - `SetHostname(ctx, hostname string) error`
-- `SetStaticIP(ctx, ip, gateway, subnet string) error`
+- `SetStaticIP(ctx, ip, gateway, subnet IPAddr) error`
 - `EnableDHCP(ctx, enable bool) error`
-- `SetDNSServer(ctx, dnsServer string) error`
+- `SetDNSServer(ctx, dnsServer IPAddr) error`
 - `SetWiFi(ctx, ssid, password string, slot int) error`
 - `SetNetworkConfig(ctx, config *NetworkConfig) error`
+- `GetMACAddress(ctx) (MACAddr, error)`
 - `Ping(ctx, host string) (bool, error)`
 
 ## Development

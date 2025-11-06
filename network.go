@@ -3,17 +3,16 @@ package tasmota
 import (
 	"context"
 	"fmt"
-	"net"
 	"strings"
 )
 
 // NetworkConfig represents network configuration settings.
 type NetworkConfig struct {
 	Hostname  string
-	IPAddress string
-	Gateway   string
-	Subnet    string
-	DNSServer string
+	IPAddress IPAddr
+	Gateway   IPAddr
+	Subnet    IPAddr
+	DNSServer IPAddr
 	SSID1     string
 	SSID2     string
 	Password1 string
@@ -34,7 +33,7 @@ func (c *Client) GetNetworkConfig(ctx context.Context) (*NetworkConfig, error) {
 		Gateway:   netInfo.Gateway,
 		Subnet:    netInfo.Subnetmask,
 		DNSServer: netInfo.DNSServer,
-		UseDHCP:   netInfo.IPAddress == "0.0.0.0",
+		UseDHCP:   netInfo.IPAddress.IsZero() || netInfo.IPAddress.String() == "0.0.0.0",
 	}
 
 	return config, nil
@@ -54,22 +53,22 @@ func (c *Client) SetHostname(ctx context.Context, hostname string) error {
 }
 
 // SetStaticIP configures a static IP address.
-func (c *Client) SetStaticIP(ctx context.Context, ip, gateway, subnet string) error {
-	// Validate IP address
-	if net.ParseIP(ip) == nil {
+func (c *Client) SetStaticIP(ctx context.Context, ip, gateway, subnet IPAddr) error {
+	// Validate IP addresses
+	if !ip.IsValid() {
 		return NewError(ErrorTypeCommand, "invalid IP address", nil)
 	}
-	if net.ParseIP(gateway) == nil {
+	if !gateway.IsValid() {
 		return NewError(ErrorTypeCommand, "invalid gateway address", nil)
 	}
-	if net.ParseIP(subnet) == nil {
+	if !subnet.IsValid() {
 		return NewError(ErrorTypeCommand, "invalid subnet mask", nil)
 	}
 
 	var commands []string
-	commands = append(commands, fmt.Sprintf("IPAddress1 %s", ip))
-	commands = append(commands, fmt.Sprintf("IPAddress2 %s", gateway))
-	commands = append(commands, fmt.Sprintf("IPAddress3 %s", subnet))
+	commands = append(commands, fmt.Sprintf("IPAddress1 %s", ip.String()))
+	commands = append(commands, fmt.Sprintf("IPAddress2 %s", gateway.String()))
+	commands = append(commands, fmt.Sprintf("IPAddress3 %s", subnet.String()))
 
 	_, err := c.ExecuteBacklog(ctx, commands...)
 	return err
@@ -88,11 +87,11 @@ func (c *Client) EnableDHCP(ctx context.Context, enable bool) error {
 }
 
 // SetDNSServer sets the DNS server address.
-func (c *Client) SetDNSServer(ctx context.Context, dnsServer string) error {
-	if net.ParseIP(dnsServer) == nil {
+func (c *Client) SetDNSServer(ctx context.Context, dnsServer IPAddr) error {
+	if !dnsServer.IsValid() {
 		return NewError(ErrorTypeCommand, "invalid DNS server address", nil)
 	}
-	cmd := fmt.Sprintf("IPAddress4 %s", dnsServer)
+	cmd := fmt.Sprintf("IPAddress4 %s", dnsServer.String())
 	_, err := c.ExecuteCommand(ctx, cmd)
 	return err
 }
@@ -197,29 +196,15 @@ func (c *Client) SetNetworkConfig(ctx context.Context, cfg *NetworkConfig) error
 	// IP configuration
 	if cfg.UseDHCP {
 		commands = append(commands, "IPAddress1 0.0.0.0")
-	} else if cfg.IPAddress != "" && cfg.Gateway != "" && cfg.Subnet != "" {
-		// Validate IPs
-		if net.ParseIP(cfg.IPAddress) == nil {
-			return NewError(ErrorTypeCommand, "invalid IP address", nil)
-		}
-		if net.ParseIP(cfg.Gateway) == nil {
-			return NewError(ErrorTypeCommand, "invalid gateway address", nil)
-		}
-		if net.ParseIP(cfg.Subnet) == nil {
-			return NewError(ErrorTypeCommand, "invalid subnet mask", nil)
-		}
-
-		commands = append(commands, fmt.Sprintf("IPAddress1 %s", cfg.IPAddress))
-		commands = append(commands, fmt.Sprintf("IPAddress2 %s", cfg.Gateway))
-		commands = append(commands, fmt.Sprintf("IPAddress3 %s", cfg.Subnet))
+	} else if cfg.IPAddress.IsValid() && cfg.Gateway.IsValid() && cfg.Subnet.IsValid() {
+		commands = append(commands, fmt.Sprintf("IPAddress1 %s", cfg.IPAddress.String()))
+		commands = append(commands, fmt.Sprintf("IPAddress2 %s", cfg.Gateway.String()))
+		commands = append(commands, fmt.Sprintf("IPAddress3 %s", cfg.Subnet.String()))
 	}
 
 	// DNS server
-	if cfg.DNSServer != "" {
-		if net.ParseIP(cfg.DNSServer) == nil {
-			return NewError(ErrorTypeCommand, "invalid DNS server address", nil)
-		}
-		commands = append(commands, fmt.Sprintf("IPAddress4 %s", cfg.DNSServer))
+	if cfg.DNSServer.IsValid() {
+		commands = append(commands, fmt.Sprintf("IPAddress4 %s", cfg.DNSServer.String()))
 	}
 
 	// WiFi credentials
@@ -245,20 +230,20 @@ func (c *Client) SetNetworkConfig(ctx context.Context, cfg *NetworkConfig) error
 }
 
 // GetIPConfig returns the current IP configuration.
-func (c *Client) GetIPConfig(ctx context.Context) (ip, gateway, subnet, dns string, err error) {
+func (c *Client) GetIPConfig(ctx context.Context) (ip, gateway, subnet, dns IPAddr, err error) {
 	netInfo, err := c.GetNetworkInfo(ctx)
 	if err != nil {
-		return "", "", "", "", err
+		return IPAddr{}, IPAddr{}, IPAddr{}, IPAddr{}, err
 	}
 
 	return netInfo.IPAddress, netInfo.Gateway, netInfo.Subnetmask, netInfo.DNSServer, nil
 }
 
 // GetMACAddress returns the device MAC address.
-func (c *Client) GetMACAddress(ctx context.Context) (string, error) {
+func (c *Client) GetMACAddress(ctx context.Context) (MACAddr, error) {
 	netInfo, err := c.GetNetworkInfo(ctx)
 	if err != nil {
-		return "", err
+		return MACAddr{}, err
 	}
 	return netInfo.Mac, nil
 }
