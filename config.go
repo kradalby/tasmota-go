@@ -92,8 +92,9 @@ func (c *Client) SetLedState(ctx context.Context, state LedState) error {
 
 // SetSleep sets the sleep mode.
 // Values:
-//   0 = Dynamic sleep disabled
-//   1..250 = Set sleep duration in milliseconds (default = 50)
+//
+//	0 = Dynamic sleep disabled
+//	1..250 = Set sleep duration in milliseconds (default = 50)
 func (c *Client) SetSleep(ctx context.Context, duration int) error {
 	if duration < 0 || duration > 250 {
 		return NewError(ErrorTypeCommand, "sleep duration must be between 0 and 250", nil)

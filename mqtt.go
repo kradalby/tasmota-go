@@ -7,19 +7,19 @@ import (
 
 // MQTTConfig represents MQTT broker configuration.
 type MQTTConfig struct {
-	Host        string
-	Port        int
-	User        string
-	Password    string
-	Client      string
-	Topic       string
-	FullTopic   string
-	GroupTopic  string
-	Retain      bool
-	TelePeriod  int
-	Prefix1     string // Command prefix (default: cmnd)
-	Prefix2     string // Status prefix (default: stat)
-	Prefix3     string // Telemetry prefix (default: tele)
+	Host       string
+	Port       int
+	User       string
+	Password   string
+	Client     string
+	Topic      string
+	FullTopic  string
+	GroupTopic string
+	Retain     bool
+	TelePeriod int
+	Prefix1    string // Command prefix (default: cmnd)
+	Prefix2    string // Status prefix (default: stat)
+	Prefix3    string // Telemetry prefix (default: tele)
 }
 
 // GetMQTTConfig retrieves the current MQTT configuration.

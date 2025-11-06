@@ -135,33 +135,33 @@ type StatusNetwork struct {
 
 // StatusMQTT contains MQTT configuration (Status 6).
 type StatusMQTT struct {
-	MqttHost        string `json:"MqttHost"`
-	MqttPort        int    `json:"MqttPort"`
-	MqttClientMask  string `json:"MqttClientMask"`
-	MqttClient      string `json:"MqttClient"`
-	MqttUser        string `json:"MqttUser"`
-	MqttCount       int    `json:"MqttCount"`
-	MaxPacketSize   int    `json:"MAX_PACKET_SIZE"`   //nolint:revive // Tasmota API field name
-	Keepalive       int    `json:"KEEPALIVE"`         //nolint:revive // Tasmota API field name
-	SocketTimeout   int    `json:"SOCKET_TIMEOUT"`    //nolint:revive // Tasmota API field name
+	MqttHost       string `json:"MqttHost"`
+	MqttPort       int    `json:"MqttPort"`
+	MqttClientMask string `json:"MqttClientMask"`
+	MqttClient     string `json:"MqttClient"`
+	MqttUser       string `json:"MqttUser"`
+	MqttCount      int    `json:"MqttCount"`
+	MaxPacketSize  int    `json:"MAX_PACKET_SIZE"` //nolint:revive // Tasmota API field name
+	Keepalive      int    `json:"KEEPALIVE"`       //nolint:revive // Tasmota API field name
+	SocketTimeout  int    `json:"SOCKET_TIMEOUT"`  //nolint:revive // Tasmota API field name
 }
 
 // StatusTime contains time information (Status 7).
 type StatusTime struct {
-	UTC       string `json:"UTC"`
-	Local     string `json:"Local"`
-	StartDST  string `json:"StartDST"`
-	EndDST    string `json:"EndDST"`
-	Timezone  int    `json:"Timezone"`
-	Sunrise   string `json:"Sunrise"`
-	Sunset    string `json:"Sunset"`
+	UTC      string `json:"UTC"`
+	Local    string `json:"Local"`
+	StartDST string `json:"StartDST"`
+	EndDST   string `json:"EndDST"`
+	Timezone int    `json:"Timezone"`
+	Sunrise  string `json:"Sunrise"`
+	Sunset   string `json:"Sunset"`
 }
 
 // StatusSensor contains sensor data (Status 8, Status 10).
 type StatusSensor struct {
-	Time   string              `json:"Time"`
-	Switch []string            `json:"Switch,omitempty"`
-	Energy *EnergyData         `json:"ENERGY,omitempty"`
+	Time   string      `json:"Time"`
+	Switch []string    `json:"Switch,omitempty"`
+	Energy *EnergyData `json:"ENERGY,omitempty"`
 	// Add more sensor types as needed
 	Raw map[string]interface{} `json:"-"` // Catch-all for unknown sensors
 }
@@ -183,61 +183,62 @@ type EnergyData struct {
 
 // StatusState contains current device state (Status 11).
 type StatusState struct {
-	Time     string   `json:"Time"`
-	Uptime   string   `json:"Uptime"`
-	UptimeSec int     `json:"UptimeSec"`
-	Heap     int      `json:"Heap"`
-	SleepMode string  `json:"SleepMode"`
-	Sleep    int      `json:"Sleep"`
-	LoadAvg  int      `json:"LoadAvg"`
-	MqttCount int     `json:"MqttCount"`
-	POWER    string   `json:"POWER,omitempty"`
-	POWER1   string   `json:"POWER1,omitempty"`
-	POWER2   string   `json:"POWER2,omitempty"`
-	POWER3   string   `json:"POWER3,omitempty"`
-	POWER4   string   `json:"POWER4,omitempty"`
-	POWER5   string   `json:"POWER5,omitempty"`
-	POWER6   string   `json:"POWER6,omitempty"`
-	POWER7   string   `json:"POWER7,omitempty"`
-	POWER8   string   `json:"POWER8,omitempty"`
-	Wifi     *WifiInfo `json:"Wifi,omitempty"`
+	Time      string    `json:"Time"`
+	Uptime    string    `json:"Uptime"`
+	UptimeSec int       `json:"UptimeSec"`
+	Heap      int       `json:"Heap"`
+	SleepMode string    `json:"SleepMode"`
+	Sleep     int       `json:"Sleep"`
+	LoadAvg   int       `json:"LoadAvg"`
+	MqttCount int       `json:"MqttCount"`
+	POWER     string    `json:"POWER,omitempty"`
+	POWER1    string    `json:"POWER1,omitempty"`
+	POWER2    string    `json:"POWER2,omitempty"`
+	POWER3    string    `json:"POWER3,omitempty"`
+	POWER4    string    `json:"POWER4,omitempty"`
+	POWER5    string    `json:"POWER5,omitempty"`
+	POWER6    string    `json:"POWER6,omitempty"`
+	POWER7    string    `json:"POWER7,omitempty"`
+	POWER8    string    `json:"POWER8,omitempty"`
+	Wifi      *WifiInfo `json:"Wifi,omitempty"`
 }
 
 // WifiInfo contains WiFi connection information.
 type WifiInfo struct {
-	AP            int    `json:"AP"`
-	SSId          string `json:"SSId"`
-	BSSId         string `json:"BSSId"`
-	Channel       int    `json:"Channel"`
-	Mode          string `json:"Mode"`
-	RSSI          int    `json:"RSSI"`
-	Signal        int    `json:"Signal"`
-	LinkCount     int    `json:"LinkCount"`
-	Downtime      string `json:"Downtime"`
+	AP        int     `json:"AP"`
+	SSId      string  `json:"SSId"`
+	BSSId     MACAddr `json:"BSSId"`
+	Channel   int     `json:"Channel"`
+	Mode      string  `json:"Mode"`
+	RSSI      int     `json:"RSSI"`
+	Signal    int     `json:"Signal"`
+	LinkCount int     `json:"LinkCount"`
+	Downtime  string  `json:"Downtime"`
 }
 
 // StatusPower contains power usage details.
 type StatusPower struct {
-	Power     float64 `json:"Power"`
-	Energy    float64 `json:"Energy"`
-	Voltage   float64 `json:"Voltage"`
-	Current   float64 `json:"Current"`
+	Power   float64 `json:"Power"`
+	Energy  float64 `json:"Energy"`
+	Voltage float64 `json:"Voltage"`
+	Current float64 `json:"Current"`
 }
 
 // Status queries device status information.
 // category can be 0 (all) or 1-11 for specific status types:
-//   0 = All status information
-//   1 = Device parameters
-//   2 = Firmware version
-//   3 = Logging information
-//   4 = Memory information
-//   5 = Network information
-//   6 = MQTT information
-//   7 = Time information
-//   8 = Sensor information
-//   9 = Power threshold
-//   10 = Sensor information
-//   11 = State information
+//
+//	0 = All status information
+//	1 = Device parameters
+//	2 = Firmware version
+//	3 = Logging information
+//	4 = Memory information
+//	5 = Network information
+//	6 = MQTT information
+//	7 = Time information
+//	8 = Sensor information
+//	9 = Power threshold
+//	10 = Sensor information
+//	11 = State information
 func (c *Client) Status(ctx context.Context, category int) (*StatusResponse, error) {
 	if category < 0 || category > 11 {
 		return nil, NewError(ErrorTypeCommand, "status category must be between 0 and 11", nil)
