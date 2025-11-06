@@ -201,6 +201,7 @@ fmt.Printf("Power: %.2fW, Voltage: %.2fV, Current: %.3fA\n",
 - `WithAuth(username, password string) ClientOption`
 - `WithTimeout(timeout time.Duration) ClientOption`
 - `WithHTTPClient(client *http.Client) ClientOption`
+- `WithLogger(logger *slog.Logger) ClientOption`
 
 ### Power Control
 
@@ -323,6 +324,37 @@ if err != nil {
     }
 }
 ```
+
+## Logging
+
+The library supports structured logging using Go's `log/slog` package. Pass a custom logger to enable request/response logging:
+
+```go
+import (
+    "log/slog"
+    "os"
+)
+
+// Create a logger with debug level
+logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+    Level: slog.LevelDebug,
+}))
+
+// Pass logger to client
+client, err := tasmota.NewClient("192.168.1.100",
+    tasmota.WithLogger(logger),
+)
+
+// Now all HTTP requests and responses will be logged
+```
+
+The logger will output structured logs like:
+```
+level=DEBUG msg="sending request" method=GET url=http://192.168.1.100/cm?cmnd=Power
+level=DEBUG msg="received response" status_code=200 body_length=15 body={"POWER":"ON"}
+```
+
+If no logger is provided, no logging will be performed.
 
 ## Contributing
 

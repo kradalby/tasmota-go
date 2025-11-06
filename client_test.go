@@ -2,8 +2,10 @@ package tasmota
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -107,13 +109,14 @@ func TestNewClient_WithOptions(t *testing.T) {
 		}
 	})
 
-	t.Run("with debug", func(t *testing.T) {
-		client, err := NewClient("192.168.1.100", WithDebug(true))
+	t.Run("with logger", func(t *testing.T) {
+		logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		client, err := NewClient("192.168.1.100", WithLogger(logger))
 		if err != nil {
 			t.Fatalf("NewClient() error: %v", err)
 		}
-		if !client.debug {
-			t.Error("debug not enabled")
+		if client.logger == nil {
+			t.Error("logger not set")
 		}
 	})
 }
