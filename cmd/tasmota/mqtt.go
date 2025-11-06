@@ -14,7 +14,50 @@ func newMQTTCmd(host, username, password *string, timeout *time.Duration, debug 
 	return &ffcli.Command{
 		Name:       "mqtt",
 		ShortUsage: "tasmota mqtt <subcommand>",
-		ShortHelp:  "MQTT configuration",
+		ShortHelp:  "MQTT broker configuration and testing",
+		LongHelp: `Configure MQTT settings on Tasmota devices.
+
+MQTT (Message Queuing Telemetry Transport) allows Tasmota devices to communicate
+with home automation systems like Home Assistant, OpenHAB, or custom solutions.
+
+You can configure:
+  - Broker host and port
+  - Authentication (username/password)
+  - Topics (device topic, full topic pattern, group topic)
+  - Message retention
+  - Telemetry period
+  - Topic prefixes for commands/status/telemetry
+
+MQTT Topics:
+  Tasmota uses a topic structure with substitution variables:
+  - %topic%  : Device topic (default: tasmota_XXXXXX)
+  - %prefix% : Command (cmnd), status (stat), or telemetry (tele)
+
+  Default full topic: %prefix%/%topic%/
+  Example: cmnd/bedroom-light/, stat/bedroom-light/, tele/bedroom-light/
+
+Examples:
+  # View current MQTT configuration
+  tasmota --host 192.168.1.100 mqtt get
+
+  # Quick setup (host only)
+  tasmota --host 192.168.1.100 mqtt set-host --mqtt-host mqtt.home
+
+  # Full configuration
+  tasmota --host 192.168.1.100 mqtt set-config \
+    --mqtt-host mqtt.home \
+    --mqtt-user homeassistant \
+    --mqtt-password secret \
+    --mqtt-topic bedroom-light \
+    --mqtt-full-topic "%prefix%/%topic%/" \
+    --tele-period 300
+
+  # Test MQTT connection
+  tasmota --host 192.168.1.100 mqtt test
+
+  # Enable/disable MQTT
+  tasmota --host 192.168.1.100 mqtt enable
+  tasmota --host 192.168.1.100 mqtt disable`,
 		Subcommands: []*ffcli.Command{
 			newMQTTGetCmd(host, username, password, timeout, debug),
 			newMQTTSetHostCmd(host, username, password, timeout, debug),

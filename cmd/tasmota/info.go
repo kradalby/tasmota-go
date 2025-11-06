@@ -15,8 +15,22 @@ func newInfoCmd(host, username, password *string, timeout *time.Duration, debug 
 	return &ffcli.Command{
 		Name:       "info",
 		ShortUsage: "tasmota info",
-		ShortHelp:  "Get device information",
-		FlagSet:    fs,
+		ShortHelp:  "Get comprehensive device information",
+		LongHelp: `Get comprehensive information about a Tasmota device.
+
+This command displays:
+  - Device name and friendly names
+  - Firmware version, build date, core version
+  - Network information (hostname, IP, MAC, WiFi power)
+  - Current state (uptime, heap memory, load average)
+  - WiFi connection details (SSID, RSSI, signal strength, channel)
+
+This is a convenient way to get a full overview of a device's status
+without querying individual status categories.
+
+Example:
+  tasmota --host 192.168.1.100 info`,
+		FlagSet: fs,
 		Exec: func(ctx context.Context, args []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
