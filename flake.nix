@@ -22,11 +22,25 @@
           ];
         };
 
-        packages.default = pkgs.buildGoModule {
-          pname = "tasmota-go";
-          version = "0.1.0";
-          src = ./.;
-          vendorHash = null;
+        packages = {
+          tasmota-cli = pkgs.buildGoModule {
+            pname = "tasmota";
+            version = "0.1.0";
+            src = ./.;
+            vendorHash = "sha256-qaS2PLxDCttfzJZrnz1d2Mk5oZ4a4uTZnQFjJe2CKek=";
+            subPackages = [ "cmd/tasmota" ];
+          };
+
+          default = self.packages.${system}.tasmota-cli;
+        };
+
+        apps = {
+          tasmota = {
+            type = "app";
+            program = "${self.packages.${system}.tasmota-cli}/bin/tasmota";
+          };
+
+          default = self.apps.${system}.tasmota;
         };
       }
     );
