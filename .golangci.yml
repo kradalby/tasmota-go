@@ -8,6 +8,7 @@ linters:
   enable:
     - errcheck
     - govet
+    - shadow
     - ineffassign
     - staticcheck
     - unused
@@ -19,8 +20,6 @@ linters:
     - gosec
 
 linters-settings:
-  govet:
-    check-shadowing: true
   revive:
     confidence: 0.8
 
