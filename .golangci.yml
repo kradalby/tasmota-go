@@ -3,12 +3,14 @@ version: 2
 run:
   timeout: 5m
   tests: true
+  skip-dirs:
+    - examples/test-live
+    - vendor
 
 linters:
   enable:
     - errcheck
     - govet
-    - shadow
     - ineffassign
     - staticcheck
     - unused
@@ -27,3 +29,6 @@ issues:
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-dirs:
+    - examples/test-live
+    - vendor

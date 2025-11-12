@@ -1,0 +1,44 @@
+# Pre-commit hooks configuration
+# See https://prek.j178.dev/ for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+exclude: '^(examples/test-live/|vendor/)'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: nixpkgs-fmt
+        name: nixpkgs-fmt
+        entry: nixpkgs-fmt
+        language: system
+        files: '\.nix$'
+
+      - id: gofmt
+        name: gofmt
+        entry: gofmt -w -s
+        language: system
+        files: '\.go$'
+
+      - id: golangci-lint
+        name: golangci-lint
+        entry: golangci-lint run --new-from-rev HEAD~1
+        language: system
+        files: '\.go$'
+        pass_filenames: false
