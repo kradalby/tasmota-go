@@ -4,6 +4,10 @@ temp-*
 # Planning documents
 TASMOTA_PLAN.md
 
+# Test files for live device testing
+test_live.go
+examples/test-live/
+
 # Binaries
 *.exe
 *.exe~
@@ -28,7 +32,12 @@ build/
 # IDE files
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 *~
 /tasmota
+
+# Nix build artifacts
+result
+result-*

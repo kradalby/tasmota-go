@@ -10,7 +10,8 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-      in {
+      in
+      {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             go_1_25
@@ -19,6 +20,8 @@
             gotools
             go-tools
             delve
+            prek
+            nixpkgs-fmt
           ];
         };
 
