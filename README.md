@@ -100,21 +100,39 @@ client.SetPower(ctx, tasmota.PowerOn, 0)
 // Set friendly name
 client.SetFriendlyName(ctx, "Living Room Lamp", 1)
 
-// Configure power-on state (3 = restore last state)
-client.SetPowerOnState(ctx, 3)
+// Configure power-on state using typed constants
+client.SetPowerOnState(ctx, tasmota.PowerOnStateSaved) // Restore last state on boot
 
-// Set LED state (1 = show power state)
-client.SetLedState(ctx, 1)
+// Set LED state using typed constants
+client.SetLedState(ctx, tasmota.LedStatePower) // Show power state on LED
 
 // Apply multiple settings atomically
 config := &tasmota.DeviceConfig{
     FriendlyName: []string{"Bedroom Light"},
-    PowerOnState: 3,
-    LedState:     1,
+    PowerOnState: tasmota.PowerOnStateSaved,
+    LedState:     tasmota.LedStatePower,
     Sleep:        50,
-    TelePeriod:   300,
 }
 client.ApplyConfig(ctx, config)
+
+// Available PowerOnState constants:
+// - PowerOnStateOff: Keep relay off
+// - PowerOnStateOn: Turn relay on
+// - PowerOnStateToggle: Toggle relay
+// - PowerOnStateSaved: Restore last state (default)
+// - PowerOnStateOnLocked: Turn on and disable control
+// - PowerOnStatePulse: Pulse mode
+
+// Available LedState constants:
+// - LedStateOff: Disable LED
+// - LedStatePower: Show power state (default)
+// - LedStateMQTTSub: Show MQTT subscriptions
+// - LedStatePowerMQTTSub: Power + MQTT subscriptions
+// - LedStateMQTTPub: Show MQTT publications
+// - LedStatePowerMQTTPub: Power + MQTT publications
+// - LedStateMQTTAll: Show all MQTT messages
+// - LedStatePowerMQTTAll: Power + all MQTT
+// - LedStateWiFiMQTT: LED on when connected
 ```
 
 ### MQTT Configuration
@@ -149,14 +167,18 @@ client.SetMQTTConfig(ctx, mqttConfig)
 // Set hostname
 client.SetHostname(ctx, "tasmota-livingroom")
 
-// Configure static IP
-client.SetStaticIP(ctx, "192.168.1.100", "192.168.1.1", "255.255.255.0")
+// Configure static IP (using typed IP addresses)
+ip := tasmota.MustParseIPAddr("192.168.1.100")
+gateway := tasmota.MustParseIPAddr("192.168.1.1")
+subnet := tasmota.MustParseIPAddr("255.255.255.0")
+client.SetStaticIP(ctx, ip, gateway, subnet)
 
 // Enable DHCP
 client.EnableDHCP(ctx, true)
 
 // Set DNS server
-client.SetDNSServer(ctx, "8.8.8.8")
+dns := tasmota.MustParseIPAddr("8.8.8.8")
+client.SetDNSServer(ctx, dns)
 
 // Configure WiFi
 client.SetWiFi(ctx, "MySSID", "password", 1)
@@ -164,10 +186,10 @@ client.SetWiFi(ctx, "MySSID", "password", 1)
 // Apply complete network configuration atomically
 netConfig := &tasmota.NetworkConfig{
     Hostname:  "tasmota-bedroom",
-    IPAddress: "192.168.1.101",
-    Gateway:   "192.168.1.1",
-    Subnet:    "255.255.255.0",
-    DNSServer: "8.8.8.8",
+    IPAddress: tasmota.MustParseIPAddr("192.168.1.101"),
+    Gateway:   tasmota.MustParseIPAddr("192.168.1.1"),
+    Subnet:    tasmota.MustParseIPAddr("255.255.255.0"),
+    DNSServer: tasmota.MustParseIPAddr("8.8.8.8"),
     SSID1:     "MySSID",
     Password1: "password",
     UseDHCP:   false,
@@ -201,6 +223,7 @@ fmt.Printf("Power: %.2fW, Voltage: %.2fV, Current: %.3fA\n",
 - `WithAuth(username, password string) ClientOption`
 - `WithTimeout(timeout time.Duration) ClientOption`
 - `WithHTTPClient(client *http.Client) ClientOption`
+- `WithLogger(logger *slog.Logger) ClientOption`
 
 ### Power Control
 
@@ -241,11 +264,12 @@ fmt.Printf("Power: %.2fW, Voltage: %.2fV, Current: %.3fA\n",
 
 - `GetNetworkConfig(ctx) (*NetworkConfig, error)`
 - `SetHostname(ctx, hostname string) error`
-- `SetStaticIP(ctx, ip, gateway, subnet string) error`
+- `SetStaticIP(ctx, ip, gateway, subnet IPAddr) error`
 - `EnableDHCP(ctx, enable bool) error`
-- `SetDNSServer(ctx, dnsServer string) error`
+- `SetDNSServer(ctx, dnsServer IPAddr) error`
 - `SetWiFi(ctx, ssid, password string, slot int) error`
 - `SetNetworkConfig(ctx, config *NetworkConfig) error`
+- `GetMACAddress(ctx) (MACAddr, error)`
 - `Ping(ctx, host string) (bool, error)`
 
 ## Development
@@ -323,6 +347,37 @@ if err != nil {
     }
 }
 ```
+
+## Logging
+
+The library supports structured logging using Go's `log/slog` package. Pass a custom logger to enable request/response logging:
+
+```go
+import (
+    "log/slog"
+    "os"
+)
+
+// Create a logger with debug level
+logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+    Level: slog.LevelDebug,
+}))
+
+// Pass logger to client
+client, err := tasmota.NewClient("192.168.1.100",
+    tasmota.WithLogger(logger),
+)
+
+// Now all HTTP requests and responses will be logged
+```
+
+The logger will output structured logs like:
+```
+level=DEBUG msg="sending request" method=GET url=http://192.168.1.100/cm?cmnd=Power
+level=DEBUG msg="received response" status_code=200 body_length=15 body={"POWER":"ON"}
+```
+
+If no logger is provided, no logging will be performed.
 
 ## Contributing
 
