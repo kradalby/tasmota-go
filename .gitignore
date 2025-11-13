@@ -1,0 +1,34 @@
+# Temp directories for reference projects
+temp-*
+
+# Planning documents
+TASMOTA_PLAN.md
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.txt
+
+# Go workspace file
+go.work
+
+# Build artifacts
+dist/
+build/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+/tasmota
