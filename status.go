@@ -3,6 +3,7 @@ package tasmota
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -105,10 +106,11 @@ type StatusMemory struct {
 	FlashSize        int      `json:"FlashSize"`
 	FlashChipId      string   `json:"FlashChipId"` //nolint:revive // Tasmota API field name
 	FlashFrequency   int      `json:"FlashFrequency"`
-	FlashMode        int      `json:"FlashMode"`
+	FlashMode        string   `json:"FlashMode"`
 	Features         []string `json:"Features"`
 	Drivers          string   `json:"Drivers"`
 	Sensors          string   `json:"Sensors"`
+	I2CDriver        string   `json:"I2CDriver,omitempty"`
 	DisplayWidth     int      `json:"DisplayWidth,omitempty"`
 	DisplayHeight    int      `json:"DisplayHeight,omitempty"`
 	DisplayMode      int      `json:"DisplayMode,omitempty"`
@@ -152,7 +154,7 @@ type StatusTime struct {
 	Local    string `json:"Local"`
 	StartDST string `json:"StartDST"`
 	EndDST   string `json:"EndDST"`
-	Timezone int    `json:"Timezone"`
+	Timezone string `json:"Timezone"`
 	Sunrise  string `json:"Sunrise"`
 	Sunset   string `json:"Sunset"`
 }
@@ -246,7 +248,7 @@ func (c *Client) Status(ctx context.Context, category int) (*StatusResponse, err
 
 	cmd := "Status"
 	if category > 0 {
-		cmd = "Status " + string(rune('0'+category))
+		cmd = fmt.Sprintf("Status %d", category)
 	}
 
 	raw, err := c.ExecuteCommand(ctx, cmd)
@@ -262,9 +264,10 @@ func (c *Client) Status(ctx context.Context, category int) (*StatusResponse, err
 	return &resp, nil
 }
 
-// GetDeviceInfo retrieves basic device information (Status 1).
+// GetDeviceInfo retrieves basic device information (Status 0).
+// Note: Status 1 returns StatusPRM (parameters), so we use Status 0 instead.
 func (c *Client) GetDeviceInfo(ctx context.Context) (*StatusInfo, error) {
-	resp, err := c.Status(ctx, 1)
+	resp, err := c.Status(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
