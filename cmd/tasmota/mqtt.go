@@ -72,7 +72,7 @@ Examples:
 			newMQTTDisableCmd(host, username, password, timeout, debug),
 			newMQTTTestCmd(host, username, password, timeout, debug),
 		},
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
 		},
 	}
@@ -86,7 +86,7 @@ func newMQTTGetCmd(host, username, password *string, timeout *time.Duration, deb
 		ShortUsage: "tasmota mqtt get",
 		ShortHelp:  "Get MQTT configuration",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -123,7 +123,7 @@ func newMQTTSetHostCmd(host, username, password *string, timeout *time.Duration,
 		ShortUsage: "tasmota mqtt set-host --mqtt-host <host> [--mqtt-port <port>]",
 		ShortHelp:  "Set MQTT broker host and port",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *mqttHost == "" {
 				return fmt.Errorf("--mqtt-host is required")
 			}
@@ -158,7 +158,7 @@ func newMQTTSetUserCmd(host, username, password *string, timeout *time.Duration,
 		ShortUsage: "tasmota mqtt set-user --mqtt-user <username>",
 		ShortHelp:  "Set MQTT username",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *mqttUser == "" {
 				return fmt.Errorf("--mqtt-user is required")
 			}
@@ -187,7 +187,7 @@ func newMQTTSetPasswordCmd(host, username, password *string, timeout *time.Durat
 		ShortUsage: "tasmota mqtt set-password --mqtt-password <password>",
 		ShortHelp:  "Set MQTT password",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *mqttPassword == "" {
 				return fmt.Errorf("--mqtt-password is required")
 			}
@@ -232,7 +232,7 @@ func newMQTTSetConfigCmd(host, username, password *string, timeout *time.Duratio
 This ensures all settings are applied together, which is useful when
 configuring MQTT for the first time or changing multiple settings.`,
 		FlagSet: fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *mqttHost == "" {
 				return fmt.Errorf("--mqtt-host is required")
 			}
@@ -306,7 +306,7 @@ func newMQTTEnableCmd(host, username, password *string, timeout *time.Duration, 
 		ShortUsage: "tasmota mqtt enable",
 		ShortHelp:  "Enable MQTT",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -330,7 +330,7 @@ func newMQTTDisableCmd(host, username, password *string, timeout *time.Duration,
 		ShortUsage: "tasmota mqtt disable",
 		ShortHelp:  "Disable MQTT",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -355,7 +355,7 @@ func newMQTTSetTopicCmd(host, username, password *string, timeout *time.Duration
 		ShortUsage: "tasmota mqtt set-topic --topic <topic>",
 		ShortHelp:  "Set MQTT topic",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *topic == "" {
 				return fmt.Errorf("--topic is required")
 			}
@@ -384,7 +384,7 @@ func newMQTTSetFullTopicCmd(host, username, password *string, timeout *time.Dura
 		ShortUsage: "tasmota mqtt set-full-topic --full-topic <topic>",
 		ShortHelp:  "Set MQTT full topic",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *fullTopic == "" {
 				return fmt.Errorf("--full-topic is required")
 			}
@@ -413,7 +413,7 @@ func newMQTTSetGroupTopicCmd(host, username, password *string, timeout *time.Dur
 		ShortUsage: "tasmota mqtt set-group-topic --group-topic <topic>",
 		ShortHelp:  "Set MQTT group topic",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *groupTopic == "" {
 				return fmt.Errorf("--group-topic is required")
 			}
@@ -442,7 +442,7 @@ func newMQTTSetRetainCmd(host, username, password *string, timeout *time.Duratio
 		ShortUsage: "tasmota mqtt set-retain [--retain=true|false]",
 		ShortHelp:  "Set MQTT retain flag",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -466,7 +466,7 @@ func newMQTTTestCmd(host, username, password *string, timeout *time.Duration, de
 		ShortUsage: "tasmota mqtt test",
 		ShortHelp:  "Test MQTT connection",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err

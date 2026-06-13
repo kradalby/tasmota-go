@@ -66,7 +66,7 @@ Environment Variables:
 			newNetworkCmd(host, username, password, timeout, debug),
 			newMQTTCmd(host, username, password, timeout, debug),
 		},
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
 		},
 	}

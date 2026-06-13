@@ -41,7 +41,7 @@ Examples:
 			newPowerToggleCmd(host, username, password, timeout, debug),
 			newPowerGetCmd(host, username, password, timeout, debug),
 		},
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
 		},
 	}
@@ -56,7 +56,7 @@ func newPowerOnCmd(host, username, password *string, timeout *time.Duration, deb
 		ShortUsage: "tasmota power on [--relay N]",
 		ShortHelp:  "Turn power on",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -87,7 +87,7 @@ func newPowerOffCmd(host, username, password *string, timeout *time.Duration, de
 		ShortUsage: "tasmota power off [--relay N]",
 		ShortHelp:  "Turn power off",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -118,7 +118,7 @@ func newPowerToggleCmd(host, username, password *string, timeout *time.Duration,
 		ShortUsage: "tasmota power toggle [--relay N]",
 		ShortHelp:  "Toggle power state",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -149,7 +149,7 @@ func newPowerGetCmd(host, username, password *string, timeout *time.Duration, de
 		ShortUsage: "tasmota power get [--relay N]",
 		ShortHelp:  "Get current power state",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err

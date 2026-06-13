@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -92,7 +93,7 @@ func TestPowerResponse_GetState(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(string(rune('0'+tt.relayNum)), func(t *testing.T) {
+		t.Run(strconv.Itoa(tt.relayNum), func(t *testing.T) {
 			if got := resp.GetState(tt.relayNum); got != tt.expected {
 				t.Errorf("GetState(%d) = %v, want %v", tt.relayNum, got, tt.expected)
 			}
@@ -238,7 +239,7 @@ func TestClient_PowerN(t *testing.T) {
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
-				expectedCmd := strings.ToLower("Power" + string(rune('0'+tt.relayNum)))
+				expectedCmd := strings.ToLower("Power" + strconv.Itoa(tt.relayNum))
 				if !strings.Contains(strings.ToLower(cmd), expectedCmd) {
 					t.Errorf("command = %s, want to contain %s", cmd, expectedCmd)
 				}
@@ -316,7 +317,7 @@ func TestClient_GetPowerN(t *testing.T) {
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				resp := `{"POWER` + string(rune('0'+tt.relayNum)) + `":"ON"}`
+				resp := `{"POWER` + strconv.Itoa(tt.relayNum) + `":"ON"}`
 				_, _ = w.Write([]byte(resp))
 			}))
 			defer server.Close()
@@ -416,7 +417,7 @@ func TestClient_SetPowerOn(t *testing.T) {
 				if tt.relayNum == 0 {
 					_, _ = w.Write([]byte(`{"POWER":"ON"}`))
 				} else {
-					resp := `{"POWER` + string(rune('0'+tt.relayNum)) + `":"ON"}`
+					resp := `{"POWER` + strconv.Itoa(tt.relayNum) + `":"ON"}`
 					_, _ = w.Write([]byte(resp))
 				}
 			}))
@@ -456,7 +457,7 @@ func TestClient_SetPowerOff(t *testing.T) {
 				if tt.relayNum == 0 {
 					_, _ = w.Write([]byte(`{"POWER":"OFF"}`))
 				} else {
-					resp := `{"POWER` + string(rune('0'+tt.relayNum)) + `":"OFF"}`
+					resp := `{"POWER` + strconv.Itoa(tt.relayNum) + `":"OFF"}`
 					_, _ = w.Write([]byte(resp))
 				}
 			}))
@@ -495,7 +496,7 @@ func TestClient_TogglePower(t *testing.T) {
 				if tt.relayNum == 0 {
 					_, _ = w.Write([]byte(`{"POWER":"ON"}`))
 				} else {
-					resp := `{"POWER` + string(rune('0'+tt.relayNum)) + `":"ON"}`
+					resp := `{"POWER` + strconv.Itoa(tt.relayNum) + `":"ON"}`
 					_, _ = w.Write([]byte(resp))
 				}
 			}))

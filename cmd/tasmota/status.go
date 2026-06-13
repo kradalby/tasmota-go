@@ -35,7 +35,7 @@ Categories:
   10 - Sensor information
   11 - State information`,
 		FlagSet: fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err

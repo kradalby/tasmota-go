@@ -1,3 +1,4 @@
+// Command tasmota is a CLI for controlling and querying Tasmota devices.
 package main
 
 import (
@@ -31,7 +32,7 @@ without querying individual status categories.
 Example:
   tasmota --host 192.168.1.100 info`,
 		FlagSet: fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err

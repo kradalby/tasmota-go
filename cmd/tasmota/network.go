@@ -52,7 +52,7 @@ Examples:
 			newNetworkSetDHCPCmd(host, username, password, timeout, debug),
 			newNetworkPingCmd(host, username, password, timeout, debug),
 		},
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
 		},
 	}
@@ -66,7 +66,7 @@ func newNetworkGetCmd(host, username, password *string, timeout *time.Duration, 
 		ShortUsage: "tasmota network get",
 		ShortHelp:  "Get network configuration",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -99,7 +99,7 @@ func newNetworkSetHostnameCmd(host, username, password *string, timeout *time.Du
 		ShortUsage: "tasmota network set-hostname --hostname <name>",
 		ShortHelp:  "Set device hostname",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *hostname == "" {
 				return fmt.Errorf("--hostname is required")
 			}
@@ -150,7 +150,7 @@ Example:
     --subnet 255.255.255.0 \
     --dns 8.8.8.8`,
 		FlagSet: fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			if *ip == "" || *gateway == "" || *subnet == "" {
 				return fmt.Errorf("--ip, --gateway, and --subnet are required")
 			}
@@ -208,7 +208,7 @@ func newNetworkSetDHCPCmd(host, username, password *string, timeout *time.Durati
 		ShortUsage: "tasmota network set-dhcp",
 		ShortHelp:  "Enable DHCP",
 		FlagSet:    fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
@@ -252,7 +252,7 @@ Examples:
   # Ping a hostname
   tasmota --host 192.168.1.100 network ping --target mqtt.home`,
 		FlagSet: fs,
-		Exec: func(ctx context.Context, args []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			client, err := newClient(*host, *username, *password, *timeout, *debug)
 			if err != nil {
 				return err
