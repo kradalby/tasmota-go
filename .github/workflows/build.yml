@@ -8,6 +8,12 @@ on:
   release:
     types: [ created ]
 
+# Every `run:` step executes inside `nix develop`, so go comes straight from the
+# flake devShell with no per-step prefix.
+defaults:
+  run:
+    shell: nix develop --command bash -e {0}
+
 jobs:
   build:
     name: Build
@@ -22,26 +28,30 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.25'
+    - name: Install Nix
+      uses: NixOS/nix-installer-action@main
+
+    - name: Setup Nix cache (hestia)
+      uses: Mic92/hestia/action@main
 
     - name: Download dependencies
       run: go mod download
 
     - name: Build examples
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
       run: |
         mkdir -p dist
         for example in examples/*/; do
           example_name=$(basename "$example")
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/${example_name}-${{ matrix.goos }}-${{ matrix.goarch }} ./${example}
+          go build -o dist/${example_name}-${{ matrix.goos }}-${{ matrix.goarch }} ./${example}
         done
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       with:
         name: examples-${{ matrix.goos }}-${{ matrix.goarch }}
         path: dist/

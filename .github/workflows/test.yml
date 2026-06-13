@@ -6,22 +6,26 @@ on:
   pull_request:
     branches: [ main ]
 
+# Every `run:` step executes inside `nix develop`, so go and golangci-lint come
+# straight from the flake devShell with no per-step prefix.
+defaults:
+  run:
+    shell: nix develop --command bash -e {0}
+
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: ['1.25']
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go-version }}
+    - name: Install Nix
+      uses: NixOS/nix-installer-action@main
+
+    - name: Setup Nix cache (hestia)
+      uses: Mic92/hestia/action@main
 
     - name: Download dependencies
       run: go mod download
@@ -30,12 +34,11 @@ jobs:
       run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
       with:
-        file: ./coverage.txt
+        files: ./coverage.txt
         flags: unittests
         name: codecov-umbrella
-      if: matrix.go-version == '1.25'
 
   lint:
     name: Lint
@@ -43,15 +46,15 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       with:
         fetch-depth: 0  # Fetch all history for comparing with main
 
     - name: Install Nix
-      uses: cachix/install-nix-action@v27
-      with:
-        extra_nix_config: |
-          experimental-features = nix-command flakes
+      uses: NixOS/nix-installer-action@main
+
+    - name: Setup Nix cache (hestia)
+      uses: Mic92/hestia/action@main
 
     - name: Run golangci-lint on PR changes only
-      run: nix develop --command golangci-lint run --new-from-rev=origin/main
+      run: golangci-lint run --new-from-rev=origin/main
