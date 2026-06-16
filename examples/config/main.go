@@ -19,7 +19,8 @@ func main() {
 	}
 
 	// Create client
-	client, err := tasmota.NewClient(host,
+	client, err := tasmota.NewClient(
+		host,
 		tasmota.WithTimeout(10*time.Second),
 	)
 	if err != nil {

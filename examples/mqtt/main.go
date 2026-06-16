@@ -27,7 +27,8 @@ func main() {
 	mqttPass := os.Getenv("MQTT_PASS")
 
 	// Create client
-	client, err := tasmota.NewClient(host,
+	client, err := tasmota.NewClient(
+		host,
 		tasmota.WithTimeout(10*time.Second),
 	)
 	if err != nil {
