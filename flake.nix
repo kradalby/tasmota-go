@@ -6,10 +6,15 @@
     flake-utils.url = "github:numtide/flake-utils";
     flake-checks.url = "github:kradalby/flake-checks";
     flake-checks.inputs.nixpkgs.follows = "nixpkgs";
+    flake-checks.inputs.flake-utils.follows = "flake-utils";
   };
 
   outputs = { self, nixpkgs, flake-utils, flake-checks }:
-    flake-utils.lib.eachDefaultSystem (system:
+    {
+      overlays.default = final: prev: {
+        tasmota = self.packages.${prev.system}.default;
+      };
+    } // flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         fc = flake-checks.lib;
@@ -29,8 +34,7 @@
             go_1_26
             golangci-lint
             gopls
-            gotools
-            go-tools
+            gofumpt
             delve
             prek
             nixpkgs-fmt
@@ -38,13 +42,7 @@
         };
 
         packages = {
-          tasmota-cli = pkgs.buildGoModule {
-            pname = "tasmota";
-            version = "0.1.0";
-            src = ./.;
-            vendorHash = "sha256-qaS2PLxDCttfzJZrnz1d2Mk5oZ4a4uTZnQFjJe2CKek=";
-            subPackages = [ "cmd/tasmota" ];
-          };
+          tasmota-cli = fc.goBuild (common // { subPackages = [ "cmd/tasmota" ]; });
 
           default = self.packages.${system}.tasmota-cli;
         };
