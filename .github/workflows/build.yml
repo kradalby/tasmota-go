@@ -8,6 +8,10 @@ on:
   release:
     types: [ created ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Every `run:` step executes inside `nix develop`, so go comes straight from the
 # flake devShell with no per-step prefix.
 defaults:
