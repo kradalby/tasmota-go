@@ -8,8 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/kradalby/tasmota-go"
 	"github.com/peterbourgon/ff/v3/ffcli"
+
+	"github.com/kradalby/tasmota-go"
 )
 
 func main() {
