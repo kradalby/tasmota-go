@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
@@ -545,5 +546,83 @@ func TestClient_GetDeviceInfo_MissingField(t *testing.T) {
 	}
 	if !IsParseError(err) {
 		t.Errorf("expected parse error, got %T", err)
+	}
+}
+
+// The six Status accessors delegate to the generic statusSection method, which
+// decouples three things that used to sit together in one hand-written body:
+// the Status category requested, the section pointer picked out of the
+// response, and the field name quoted in the error. A mismatched triple would
+// still compile and still return a plausible value, so pin all three here --
+// this is the test the refactor owes.
+func TestClient_StatusAccessors(t *testing.T) {
+	tests := []struct {
+		name    string
+		call    func(context.Context, *Client) (any, error)
+		wantCmd string
+		section string
+	}{
+		{"GetDeviceInfo", func(ctx context.Context, c *Client) (any, error) { v, err := c.GetDeviceInfo(ctx); return v, err }, "Status", "Status"},
+		{"GetFirmwareInfo", func(ctx context.Context, c *Client) (any, error) { v, err := c.GetFirmwareInfo(ctx); return v, err }, "Status 2", "StatusFWR"},
+		{"GetNetworkInfo", func(ctx context.Context, c *Client) (any, error) { v, err := c.GetNetworkInfo(ctx); return v, err }, "Status 5", "StatusNET"},
+		{"GetMQTTInfo", func(ctx context.Context, c *Client) (any, error) { v, err := c.GetMQTTInfo(ctx); return v, err }, "Status 6", "StatusMQT"},
+		{"GetSensorData", func(ctx context.Context, c *Client) (any, error) { v, err := c.GetSensorData(ctx); return v, err }, "Status 10", "StatusSNS"},
+		{"GetState", func(ctx context.Context, c *Client) (any, error) { v, err := c.GetState(ctx); return v, err }, "Status 11", "StatusSTS"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name+" requests its category and picks its section", func(t *testing.T) {
+			var gotCmd string
+			// Only this accessor's own section is present. A `pick` closure
+			// wired to the wrong field would come back nil and error out.
+			body := `{"` + tt.section + `":{}}`
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				gotCmd = r.URL.Query().Get("cmnd")
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(body))
+			}))
+
+			httpClient := server.Client()
+			client := &Client{
+				baseURL:    server.URL,
+				httpClient: httpClient,
+			}
+
+			got, err := tt.call(context.Background(), client)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got == nil {
+				t.Fatal("returned nil section")
+			}
+			if gotCmd != tt.wantCmd {
+				t.Errorf("cmnd = %q, want %q", gotCmd, tt.wantCmd)
+			}
+		})
+
+		t.Run(tt.name+" names its section when absent", func(t *testing.T) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{}`))
+			}))
+
+			httpClient := server.Client()
+			client := &Client{
+				baseURL:    server.URL,
+				httpClient: httpClient,
+			}
+
+			_, err := tt.call(context.Background(), client)
+			if err == nil {
+				t.Fatal("expected error for missing section, got nil")
+			}
+			if !IsParseError(err) {
+				t.Errorf("IsParseError = false, want true (err: %v)", err)
+			}
+			want := "status response missing " + tt.section + " field"
+			if !strings.Contains(err.Error(), want) {
+				t.Errorf("error = %q, want it to contain %q", err.Error(), want)
+			}
+		})
 	}
 }

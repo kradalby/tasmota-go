@@ -264,77 +264,56 @@ func (c *Client) Status(ctx context.Context, category int) (*StatusResponse, err
 	return &resp, nil
 }
 
-// GetDeviceInfo retrieves basic device information (Status 0).
-// Note: Status 1 returns StatusPRM (parameters), so we use Status 0 instead.
-func (c *Client) GetDeviceInfo(ctx context.Context) (*StatusInfo, error) {
-	resp, err := c.Status(ctx, 0)
+// statusSection fetches one Status category and returns the named section,
+// failing with a parse error when the device omits it. The six section types
+// share nothing but their pointer shape, so this is a generic method (Go 1.27)
+// instead of six copies of the same six lines.
+func (c *Client) statusSection[T any](
+	ctx context.Context,
+	category int,
+	field string,
+	pick func(*StatusResponse) *T,
+) (*T, error) {
+	resp, err := c.Status(ctx, category)
 	if err != nil {
 		return nil, err
 	}
-	if resp.Status == nil {
-		return nil, NewError(ErrorTypeParse, "status response missing Status field", nil)
+	section := pick(resp)
+	if section == nil {
+		return nil, NewError(ErrorTypeParse, "status response missing "+field+" field", nil)
 	}
-	return resp.Status, nil
+	return section, nil
+}
+
+// GetDeviceInfo retrieves basic device information (Status 0).
+// Note: Status 1 returns StatusPRM (parameters), so we use Status 0 instead.
+func (c *Client) GetDeviceInfo(ctx context.Context) (*StatusInfo, error) {
+	return c.statusSection(ctx, 0, "Status", func(r *StatusResponse) *StatusInfo { return r.Status })
 }
 
 // GetFirmwareInfo retrieves firmware version information (Status 2).
 func (c *Client) GetFirmwareInfo(ctx context.Context) (*StatusFirmware, error) {
-	resp, err := c.Status(ctx, 2)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusFWR == nil {
-		return nil, NewError(ErrorTypeParse, "status response missing StatusFWR field", nil)
-	}
-	return resp.StatusFWR, nil
+	return c.statusSection(ctx, 2, "StatusFWR", func(r *StatusResponse) *StatusFirmware { return r.StatusFWR })
 }
 
 // GetNetworkInfo retrieves network configuration (Status 5).
 func (c *Client) GetNetworkInfo(ctx context.Context) (*StatusNetwork, error) {
-	resp, err := c.Status(ctx, 5)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusNET == nil {
-		return nil, NewError(ErrorTypeParse, "status response missing StatusNET field", nil)
-	}
-	return resp.StatusNET, nil
+	return c.statusSection(ctx, 5, "StatusNET", func(r *StatusResponse) *StatusNetwork { return r.StatusNET })
 }
 
 // GetMQTTInfo retrieves MQTT configuration (Status 6).
 func (c *Client) GetMQTTInfo(ctx context.Context) (*StatusMQTT, error) {
-	resp, err := c.Status(ctx, 6)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusMQT == nil {
-		return nil, NewError(ErrorTypeParse, "status response missing StatusMQT field", nil)
-	}
-	return resp.StatusMQT, nil
+	return c.statusSection(ctx, 6, "StatusMQT", func(r *StatusResponse) *StatusMQTT { return r.StatusMQT })
 }
 
 // GetSensorData retrieves sensor readings (Status 10).
 func (c *Client) GetSensorData(ctx context.Context) (*StatusSensor, error) {
-	resp, err := c.Status(ctx, 10)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusSNS == nil {
-		return nil, NewError(ErrorTypeParse, "status response missing StatusSNS field", nil)
-	}
-	return resp.StatusSNS, nil
+	return c.statusSection(ctx, 10, "StatusSNS", func(r *StatusResponse) *StatusSensor { return r.StatusSNS })
 }
 
 // GetState retrieves current device state (Status 11).
 func (c *Client) GetState(ctx context.Context) (*StatusState, error) {
-	resp, err := c.Status(ctx, 11)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusSTS == nil {
-		return nil, NewError(ErrorTypeParse, "status response missing StatusSTS field", nil)
-	}
-	return resp.StatusSTS, nil
+	return c.statusSection(ctx, 11, "StatusSTS", func(r *StatusResponse) *StatusState { return r.StatusSTS })
 }
 
 // GetUptime retrieves device uptime.
