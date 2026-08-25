@@ -515,7 +515,7 @@ func TestClient_SetOption(t *testing.T) {
 	tests := []struct {
 		name    string
 		option  int
-		value   interface{}
+		value   any
 		wantErr bool
 	}{
 		{"bool true", 1, true, false},

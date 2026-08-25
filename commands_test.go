@@ -105,7 +105,7 @@ func TestClient_ExecuteCommand(t *testing.T) {
 				}
 
 				// Verify response is valid JSON
-				var v interface{}
+				var v any
 				if err := json.Unmarshal(resp, &v); err != nil {
 					t.Errorf("response is not valid JSON: %v", err)
 				}

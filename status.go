@@ -165,7 +165,7 @@ type StatusSensor struct {
 	Switch []string    `json:"Switch,omitempty"`
 	Energy *EnergyData `json:"ENERGY,omitempty"`
 	// Add more sensor types as needed
-	Raw map[string]interface{} `json:"-"` // Catch-all for unknown sensors
+	Raw map[string]any `json:"-"` // Catch-all for unknown sensors
 }
 
 // EnergyData contains power monitoring information.

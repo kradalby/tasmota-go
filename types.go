@@ -9,7 +9,7 @@ const Version = "0.1.0"
 var UserAgent = "tasmota-go/" + Version
 
 // unmarshalJSON is a helper function to unmarshal JSON with proper error handling.
-func unmarshalJSON(data []byte, v interface{}) error {
+func unmarshalJSON(data []byte, v any) error {
 	if err := json.Unmarshal(data, v); err != nil {
 		return NewError(ErrorTypeParse, "failed to parse JSON response", err)
 	}
