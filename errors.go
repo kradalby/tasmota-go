@@ -74,8 +74,7 @@ func NewError(errType ErrorType, message string, err error) *Error {
 
 // IsNetworkError checks if the error is a network error.
 func IsNetworkError(err error) bool {
-	var tasErr *Error
-	if errors.As(err, &tasErr) {
+	if tasErr, ok := errors.AsType[*Error](err); ok {
 		return tasErr.Type == ErrorTypeNetwork
 	}
 	return false
@@ -83,8 +82,7 @@ func IsNetworkError(err error) bool {
 
 // IsAuthError checks if the error is an authentication error.
 func IsAuthError(err error) bool {
-	var tasErr *Error
-	if errors.As(err, &tasErr) {
+	if tasErr, ok := errors.AsType[*Error](err); ok {
 		return tasErr.Type == ErrorTypeAuth
 	}
 	return false
@@ -92,8 +90,7 @@ func IsAuthError(err error) bool {
 
 // IsCommandError checks if the error is a command execution error.
 func IsCommandError(err error) bool {
-	var tasErr *Error
-	if errors.As(err, &tasErr) {
+	if tasErr, ok := errors.AsType[*Error](err); ok {
 		return tasErr.Type == ErrorTypeCommand
 	}
 	return false
@@ -101,8 +98,7 @@ func IsCommandError(err error) bool {
 
 // IsParseError checks if the error is a parsing error.
 func IsParseError(err error) bool {
-	var tasErr *Error
-	if errors.As(err, &tasErr) {
+	if tasErr, ok := errors.AsType[*Error](err); ok {
 		return tasErr.Type == ErrorTypeParse
 	}
 	return false
@@ -110,8 +106,7 @@ func IsParseError(err error) bool {
 
 // IsTimeoutError checks if the error is a timeout error.
 func IsTimeoutError(err error) bool {
-	var tasErr *Error
-	if errors.As(err, &tasErr) {
+	if tasErr, ok := errors.AsType[*Error](err); ok {
 		return tasErr.Type == ErrorTypeTimeout
 	}
 	return false
@@ -119,8 +114,7 @@ func IsTimeoutError(err error) bool {
 
 // IsDeviceError checks if the error is a device-specific error.
 func IsDeviceError(err error) bool {
-	var tasErr *Error
-	if errors.As(err, &tasErr) {
+	if tasErr, ok := errors.AsType[*Error](err); ok {
 		return tasErr.Type == ErrorTypeDevice
 	}
 	return false
