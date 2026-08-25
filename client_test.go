@@ -311,6 +311,70 @@ func TestClient_Do(t *testing.T) {
 		}
 	})
 
+	// Regression: http.Client.Timeout -- set by WithTimeout, and by
+	// DefaultResponseTimeout on every client built with NewClient -- fires
+	// without ever populating ctx.Err(), so it used to be misreported as a
+	// network error and IsTimeoutError was effectively dead for it.
+	t.Run("client timeout without context deadline", func(t *testing.T) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			time.Sleep(100 * time.Millisecond)
+			w.WriteHeader(http.StatusOK)
+		}))
+
+		httpClient := server.Client()
+		httpClient.Timeout = 10 * time.Millisecond
+
+		client := &Client{
+			baseURL:    server.URL,
+			httpClient: httpClient,
+		}
+
+		_, err := client.do(context.Background(), server.URL)
+		if err == nil {
+			t.Fatal("do() expected error, got nil")
+		}
+		if !IsTimeoutError(err) {
+			t.Errorf("IsTimeoutError = false, want true (err: %v)", err)
+		}
+		if IsNetworkError(err) {
+			t.Errorf("IsNetworkError = true, want false (err: %v)", err)
+		}
+	})
+
+	// Regression: a device that answers, then stalls mid-body, trips the same
+	// http.Client.Timeout. That failure surfaces from io.ReadAll rather than
+	// from Do, so it needs the same classification -- it used to be reported
+	// as a plain network error.
+	t.Run("client timeout while reading body", func(t *testing.T) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			}
+			_, _ = w.Write([]byte("{"))
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			}
+			time.Sleep(200 * time.Millisecond)
+		}))
+
+		httpClient := server.Client()
+		httpClient.Timeout = 20 * time.Millisecond
+
+		client := &Client{
+			baseURL:    server.URL,
+			httpClient: httpClient,
+		}
+
+		_, err := client.do(context.Background(), server.URL)
+		if err == nil {
+			t.Fatal("do() expected error, got nil")
+		}
+		if !IsTimeoutError(err) {
+			t.Errorf("IsTimeoutError = false, want true (err: %v)", err)
+		}
+	})
+
 	t.Run("server error", func(t *testing.T) {
 		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)

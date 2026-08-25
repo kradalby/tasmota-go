@@ -3,6 +3,7 @@ package tasmota
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -147,6 +148,23 @@ func (c *Client) buildURL(command string) (string, error) {
 }
 
 // do executes an HTTP GET request and returns the response body.
+// classifyTransportError maps a transport-level failure onto the library's
+// error taxonomy. A timeout cannot be recognised from the context alone:
+// http.Client.Timeout -- set by WithTimeout, and by DefaultResponseTimeout on
+// every client built with NewClient -- and the dialer timeout both fire
+// without ever populating ctx.Err(). net.Error is what actually reports them,
+// and it does so for a stalled response body just as much as for a request
+// that never got a reply, so both call sites share this.
+func classifyTransportError(ctx context.Context, err error, networkMessage string) error {
+	if netErr, ok := errors.AsType[net.Error](err); ok && netErr.Timeout() {
+		return NewError(ErrorTypeTimeout, "request timeout", err)
+	}
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return NewError(ErrorTypeTimeout, "request timeout", err)
+	}
+	return NewError(ErrorTypeNetwork, networkMessage, err)
+}
+
 func (c *Client) do(ctx context.Context, urlStr string) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, urlStr, nil)
 	if err != nil {
@@ -168,11 +186,7 @@ func (c *Client) do(ctx context.Context, urlStr string) ([]byte, error) {
 				"url", urlStr,
 				"error", err)
 		}
-		// Check if it's a timeout
-		if ctx.Err() == context.DeadlineExceeded {
-			return nil, NewError(ErrorTypeTimeout, "request timeout", err)
-		}
-		return nil, NewError(ErrorTypeNetwork, "request failed", err)
+		return nil, classifyTransportError(ctx, err, "request failed")
 	}
 	defer func() {
 		_ = resp.Body.Close()
@@ -184,7 +198,7 @@ func (c *Client) do(ctx context.Context, urlStr string) ([]byte, error) {
 			c.logger.Error("failed to read response body",
 				"error", err)
 		}
-		return nil, NewError(ErrorTypeNetwork, "failed to read response", err)
+		return nil, classifyTransportError(ctx, err, "failed to read response")
 	}
 
 	if c.logger != nil {
