@@ -58,7 +58,7 @@ func TestClient_ExecuteCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				// Verify command is in query params
 				if tt.command != "" && !strings.Contains(r.URL.RawQuery, "cmnd=") {
 					t.Error("command not found in query params")
@@ -69,11 +69,11 @@ func TestClient_ExecuteCommand(t *testing.T) {
 					_, _ = w.Write([]byte(tt.response))
 				}
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			resp, err := client.ExecuteCommand(context.Background(), tt.command)
@@ -181,16 +181,16 @@ func TestClient_ExecuteBacklog(t *testing.T) {
 			}
 
 			var receivedCommand string
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				receivedCommand = r.URL.Query().Get("cmnd")
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Response":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			resp, err := client.ExecuteBacklog(context.Background(), tt.commands...)
@@ -226,18 +226,18 @@ func TestClient_ExecuteBacklog(t *testing.T) {
 
 func TestClient_ExecuteBacklog_Integration(t *testing.T) {
 	commandsReceived := []string{}
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cmd := r.URL.Query().Get("cmnd")
 		commandsReceived = append(commandsReceived, cmd)
 
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"Response":"Done"}`))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	// Test multiple backlog executions

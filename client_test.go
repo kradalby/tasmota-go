@@ -241,7 +241,7 @@ func TestClient_BuildURL(t *testing.T) {
 
 func TestClient_Do(t *testing.T) {
 	t.Run("successful request", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Method != http.MethodGet {
 				t.Errorf("method = %v, want GET", r.Method)
 			}
@@ -251,11 +251,11 @@ func TestClient_Do(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"POWER":"ON"}`))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		body, err := client.do(context.Background(), server.URL)
@@ -268,14 +268,14 @@ func TestClient_Do(t *testing.T) {
 	})
 
 	t.Run("unauthorized", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		_, err := client.do(context.Background(), server.URL)
@@ -288,15 +288,15 @@ func TestClient_Do(t *testing.T) {
 	})
 
 	t.Run("timeout", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			time.Sleep(100 * time.Millisecond)
 			w.WriteHeader(http.StatusOK)
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
@@ -312,14 +312,14 @@ func TestClient_Do(t *testing.T) {
 	})
 
 	t.Run("server error", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		_, err := client.do(context.Background(), server.URL)

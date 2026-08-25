@@ -89,15 +89,15 @@ func TestClient_Status(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			resp, err := client.Status(context.Background(), tt.category)
@@ -150,15 +150,15 @@ func TestClient_GetDeviceInfo(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	info, err := client.GetDeviceInfo(context.Background())
@@ -190,15 +190,15 @@ func TestClient_GetFirmwareInfo(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	info, err := client.GetFirmwareInfo(context.Background())
@@ -228,15 +228,15 @@ func TestClient_GetNetworkInfo(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	info, err := client.GetNetworkInfo(context.Background())
@@ -269,15 +269,15 @@ func TestClient_GetMQTTInfo(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	info, err := client.GetMQTTInfo(context.Background())
@@ -315,15 +315,15 @@ func TestClient_GetSensorData(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	sensor, err := client.GetSensorData(context.Background())
@@ -381,15 +381,15 @@ func TestClient_GetState(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	state, err := client.GetState(context.Background())
@@ -436,15 +436,15 @@ func TestClient_GetUptime(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	uptime, err := client.GetUptime(context.Background())
@@ -496,15 +496,15 @@ func TestClient_GetWiFiSignal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			rssi, err := client.GetWiFiSignal(context.Background())
@@ -528,15 +528,15 @@ func TestClient_GetWiFiSignal(t *testing.T) {
 func TestClient_GetDeviceInfo_MissingField(t *testing.T) {
 	mockResponse := `{}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	_, err := client.GetDeviceInfo(context.Background())

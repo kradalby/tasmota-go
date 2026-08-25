@@ -24,15 +24,15 @@ func TestClient_GetConfig(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	config, err := client.GetConfig(context.Background())
@@ -72,7 +72,7 @@ func TestClient_SetDeviceName(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, tt.devName) {
 					t.Errorf("command does not contain device name %s", tt.devName)
@@ -80,11 +80,11 @@ func TestClient_SetDeviceName(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"DeviceName":"` + tt.devName + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetDeviceName(context.Background(), tt.devName)
@@ -96,7 +96,7 @@ func TestClient_SetDeviceName(t *testing.T) {
 }
 
 func TestClient_SetFriendlyName(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cmd := r.URL.Query().Get("cmnd")
 		if !strings.Contains(cmd, "FriendlyName1") {
 			t.Error("command should contain FriendlyName1")
@@ -104,11 +104,11 @@ func TestClient_SetFriendlyName(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"FriendlyName1":"Test"}`))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	err := client.SetFriendlyName(context.Background(), "Test")
@@ -142,15 +142,15 @@ func TestClient_SetFriendlyNameN(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"FriendlyName":"` + tt.fname + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetFriendlyNameN(context.Background(), tt.index, tt.fname)
@@ -185,15 +185,15 @@ func TestClient_SetPowerOnState(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = fmt.Fprintf(w, `{"PowerOnState":%d}`, tt.state)
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetPowerOnState(context.Background(), PowerOnState(tt.state))
@@ -228,15 +228,15 @@ func TestClient_SetLedState(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = fmt.Fprintf(w, `{"LedState":%d}`, tt.state)
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetLedState(context.Background(), LedState(tt.state))
@@ -271,15 +271,15 @@ func TestClient_SetSleep(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = fmt.Fprintf(w, `{"Sleep":%d}`, tt.duration)
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetSleep(context.Background(), tt.duration)
@@ -308,15 +308,15 @@ func TestClient_SetRetainFlags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Retain":1}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := tt.method(client, context.Background(), tt.retain)
@@ -374,7 +374,7 @@ func TestClient_ApplyConfig(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "Backlog") {
 					t.Error("command should use Backlog")
@@ -382,11 +382,11 @@ func TestClient_ApplyConfig(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Response":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.ApplyConfig(context.Background(), tt.config)
@@ -419,15 +419,15 @@ func TestClient_Restart(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Restart":"Restarting"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.Restart(context.Background(), RestartReason(tt.reason))
@@ -465,15 +465,15 @@ func TestClient_Reset(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Reset":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.Reset(context.Background(), ResetLevel(tt.level))
@@ -491,15 +491,15 @@ func TestClient_GetModule(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	module, err := client.GetModule(context.Background())
@@ -537,15 +537,15 @@ func TestClient_SetOption(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"SetOption":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetOption(context.Background(), tt.option, tt.value)
@@ -560,15 +560,15 @@ func TestClient_TelePeriod(t *testing.T) {
 	t.Run("get", func(t *testing.T) {
 		mockResponse := `{"TelePeriod":300}`
 
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(mockResponse))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		period, err := client.GetTelePeriod(context.Background())
@@ -581,15 +581,15 @@ func TestClient_TelePeriod(t *testing.T) {
 	})
 
 	t.Run("set valid", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"TelePeriod":600}`))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		err := client.SetTelePeriod(context.Background(), 600)
@@ -632,15 +632,15 @@ func TestClient_SetTemplate(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Template":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetTemplate(context.Background(), tt.template)

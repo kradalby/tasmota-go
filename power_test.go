@@ -141,7 +141,7 @@ func TestClient_Power(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				// Verify command contains the state
 				if !strings.Contains(r.URL.Query().Get("cmnd"), string(tt.state)) {
 					t.Errorf("command does not contain state %s", tt.state)
@@ -149,11 +149,11 @@ func TestClient_Power(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			resp, err := client.Power(context.Background(), tt.state)
@@ -237,7 +237,7 @@ func TestClient_PowerN(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				expectedCmd := strings.ToLower("Power" + strconv.Itoa(tt.relayNum))
 				if !strings.Contains(strings.ToLower(cmd), expectedCmd) {
@@ -246,11 +246,11 @@ func TestClient_PowerN(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			resp, err := client.PowerN(context.Background(), tt.relayNum, tt.state)
@@ -268,7 +268,7 @@ func TestClient_PowerN(t *testing.T) {
 }
 
 func TestClient_GetPower(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cmd := r.URL.Query().Get("cmnd")
 		if cmd != "Power" {
 			t.Errorf("command = %s, want Power", cmd)
@@ -276,11 +276,11 @@ func TestClient_GetPower(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"POWER":"ON"}`))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	resp, err := client.GetPower(context.Background())
@@ -315,16 +315,16 @@ func TestClient_GetPowerN(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				resp := `{"POWER` + strconv.Itoa(tt.relayNum) + `":"ON"}`
 				_, _ = w.Write([]byte(resp))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			resp, err := client.GetPowerN(context.Background(), tt.relayNum)
@@ -374,15 +374,15 @@ func TestClient_IsPowerOn(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			isOn, err := client.IsPowerOn(context.Background(), tt.relayNum)
@@ -408,7 +408,7 @@ func TestClient_SetPowerOn(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "ON") {
 					t.Error("command does not contain ON")
@@ -421,11 +421,11 @@ func TestClient_SetPowerOn(t *testing.T) {
 					_, _ = w.Write([]byte(resp))
 				}
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetPowerOn(context.Background(), tt.relayNum)
@@ -448,7 +448,7 @@ func TestClient_SetPowerOff(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "OFF") {
 					t.Error("command does not contain OFF")
@@ -461,11 +461,11 @@ func TestClient_SetPowerOff(t *testing.T) {
 					_, _ = w.Write([]byte(resp))
 				}
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetPowerOff(context.Background(), tt.relayNum)
@@ -487,7 +487,7 @@ func TestClient_TogglePower(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "TOGGLE") {
 					t.Error("command does not contain TOGGLE")
@@ -500,11 +500,11 @@ func TestClient_TogglePower(t *testing.T) {
 					_, _ = w.Write([]byte(resp))
 				}
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.TogglePower(context.Background(), tt.relayNum)
@@ -554,7 +554,7 @@ func TestClient_GetCurrentPower(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if cmd != "Status 10" {
 					t.Errorf("command = %s, want Status 10", cmd)
@@ -562,11 +562,11 @@ func TestClient_GetCurrentPower(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			power, err := client.GetCurrentPower(context.Background())

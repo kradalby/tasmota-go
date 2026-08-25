@@ -21,15 +21,15 @@ func TestClient_GetNetworkConfig(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	config, err := client.GetNetworkConfig(context.Background())
@@ -70,7 +70,7 @@ func TestClient_SetHostname(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, tt.hostname) {
 					t.Errorf("command does not contain hostname %s", tt.hostname)
@@ -78,11 +78,11 @@ func TestClient_SetHostname(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Hostname":"` + tt.hostname + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetHostname(context.Background(), tt.hostname)
@@ -146,7 +146,7 @@ func TestClient_SetStaticIP(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "Backlog") {
 					t.Error("command should use Backlog")
@@ -154,11 +154,11 @@ func TestClient_SetStaticIP(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Response":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetStaticIP(context.Background(), ip, gateway, subnet)
@@ -171,7 +171,7 @@ func TestClient_SetStaticIP(t *testing.T) {
 
 func TestClient_EnableDHCP(t *testing.T) {
 	t.Run("enable", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cmd := r.URL.Query().Get("cmnd")
 			if !strings.Contains(cmd, "0.0.0.0") {
 				t.Error("command should contain 0.0.0.0")
@@ -179,11 +179,11 @@ func TestClient_EnableDHCP(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"IPAddress1":"0.0.0.0"}`))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		err := client.EnableDHCP(context.Background(), true)
@@ -224,15 +224,15 @@ func TestClient_SetDNSServer(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"IPAddress4":"` + tt.dnsServer + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetDNSServer(context.Background(), dnsServer)
@@ -270,7 +270,7 @@ func TestClient_SetWiFi(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "Backlog") {
 					t.Error("command should use Backlog")
@@ -278,11 +278,11 @@ func TestClient_SetWiFi(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Response":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetWiFi(context.Background(), tt.ssid, tt.password, tt.slot)
@@ -296,15 +296,15 @@ func TestClient_SetWiFi(t *testing.T) {
 func TestClient_GetSSID(t *testing.T) {
 	mockResponse := `{"SSId1":"WiFi1","SSId2":"WiFi2"}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	ssids, err := client.GetSSID(context.Background())
@@ -346,15 +346,15 @@ func TestClient_SetAPMode(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = fmt.Fprintf(w, `{"AP":%d}`, tt.mode)
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetAPMode(context.Background(), APMode(tt.mode))
@@ -367,15 +367,15 @@ func TestClient_SetAPMode(t *testing.T) {
 
 func TestClient_WebPassword(t *testing.T) {
 	t.Run("set", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"WebPassword":"****"}`))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		err := client.SetWebPassword(context.Background(), "secret")
@@ -387,15 +387,15 @@ func TestClient_WebPassword(t *testing.T) {
 	t.Run("get", func(t *testing.T) {
 		mockResponse := `{"WebPassword":1}`
 
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(mockResponse))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		hasPassword, err := client.GetWebPassword(context.Background())
@@ -474,7 +474,7 @@ func TestClient_SetNetworkConfig(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "Backlog") {
 					t.Error("command should use Backlog")
@@ -482,11 +482,11 @@ func TestClient_SetNetworkConfig(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Response":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetNetworkConfig(context.Background(), tt.config)
@@ -507,15 +507,15 @@ func TestClient_GetIPConfig(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	ip, gateway, subnet, dns, err := client.GetIPConfig(context.Background())
@@ -544,15 +544,15 @@ func TestClient_GetMACAddress(t *testing.T) {
 		}
 	}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(mockResponse))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	mac, err := client.GetMACAddress(context.Background())
@@ -573,15 +573,15 @@ func TestClient_WiFiPower(t *testing.T) {
 			}
 		}`
 
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(mockResponse))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		power, err := client.GetWiFiPower(context.Background())
@@ -594,15 +594,15 @@ func TestClient_WiFiPower(t *testing.T) {
 	})
 
 	t.Run("set valid", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"WifiPower":17.0}`))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		err := client.SetWiFiPower(context.Background(), 17.0)
@@ -650,15 +650,15 @@ func TestClient_SetWiFiConfig(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = fmt.Fprintf(w, `{"WifiConfig":%d}`, tt.mode)
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetWiFiConfig(context.Background(), WiFiConfigMode(tt.mode))
@@ -709,15 +709,15 @@ func TestClient_Ping(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			success, err := client.Ping(context.Background(), tt.host)
