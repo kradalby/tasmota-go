@@ -9,12 +9,20 @@
     flake-checks.inputs.flake-utils.follows = "flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, flake-checks }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      flake-checks,
+    }:
     {
       overlays.default = final: prev: {
         tasmota = self.packages.${prev.system}.default;
       };
-    } // flake-utils.lib.eachDefaultSystem (system:
+    }
+    // flake-utils.lib.eachDefaultSystem (
+      system:
       let
         # Go 1.27. Note that bare `pkgs.go` / `pkgs.buildGoModule` still resolve
         # to 1.26 in nixpkgs-unstable, so the latest toolchain has to be named
