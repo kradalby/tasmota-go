@@ -10,7 +10,7 @@ import (
 
 func TestClient_GetMQTTConfig(t *testing.T) {
 	callCount := 0
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if callCount == 0 {
 			// First call: Status 6 (MQTT info)
@@ -21,11 +21,11 @@ func TestClient_GetMQTTConfig(t *testing.T) {
 		}
 		callCount++
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	config, err := client.GetMQTTConfig(context.Background())
@@ -69,7 +69,7 @@ func TestClient_SetMQTTHost(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, tt.host) {
 					t.Errorf("command does not contain host %s", tt.host)
@@ -77,11 +77,11 @@ func TestClient_SetMQTTHost(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"MqttHost":"` + tt.host + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetMQTTHost(context.Background(), tt.host)
@@ -115,15 +115,15 @@ func TestClient_SetMQTTPort(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"MqttPort":1883}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetMQTTPort(context.Background(), tt.port)
@@ -135,15 +135,15 @@ func TestClient_SetMQTTPort(t *testing.T) {
 }
 
 func TestClient_SetMQTTUser(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"MqttUser":"testuser"}`))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	err := client.SetMQTTUser(context.Background(), "testuser")
@@ -153,15 +153,15 @@ func TestClient_SetMQTTUser(t *testing.T) {
 }
 
 func TestClient_SetMQTTPassword(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"MqttPassword":"****"}`))
 	}))
-	defer server.Close()
 
+	httpClient := server.Client()
 	client := &Client{
 		baseURL:    server.URL,
-		httpClient: server.Client(),
+		httpClient: httpClient,
 	}
 
 	err := client.SetMQTTPassword(context.Background(), "secret")
@@ -191,15 +191,15 @@ func TestClient_SetMQTTClient(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"MqttClient":"` + tt.clientName + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetMQTTClient(context.Background(), tt.clientName)
@@ -231,15 +231,15 @@ func TestClient_SetTopic(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Topic":"` + tt.topic + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetTopic(context.Background(), tt.topic)
@@ -271,15 +271,15 @@ func TestClient_SetFullTopic(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"FullTopic":"` + tt.fullTopic + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetFullTopic(context.Background(), tt.fullTopic)
@@ -311,15 +311,15 @@ func TestClient_SetGroupTopic(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"GroupTopic":"` + tt.groupTopic + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetGroupTopic(context.Background(), tt.groupTopic)
@@ -356,15 +356,15 @@ func TestClient_SetPrefix(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Prefix":"` + tt.prefix + `"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetPrefix(context.Background(), tt.prefixNum, tt.prefix)
@@ -386,15 +386,15 @@ func TestClient_EnableMQTT(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"SetOption3":0}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.EnableMQTT(context.Background(), tt.enable)
@@ -457,7 +457,7 @@ func TestClient_SetMQTTConfig(t *testing.T) {
 				return
 			}
 
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				cmd := r.URL.Query().Get("cmnd")
 				if !strings.Contains(cmd, "Backlog") {
 					t.Error("command should use Backlog")
@@ -465,11 +465,11 @@ func TestClient_SetMQTTConfig(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"Response":"Done"}`))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.SetMQTTConfig(context.Background(), tt.config)
@@ -484,15 +484,15 @@ func TestClient_MQTTFingerprint(t *testing.T) {
 	t.Run("get", func(t *testing.T) {
 		mockResponse := `{"MqttFingerprint":"AA BB CC DD EE FF"}`
 
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(mockResponse))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		fp, err := client.GetMQTTFingerprint(context.Background())
@@ -505,15 +505,15 @@ func TestClient_MQTTFingerprint(t *testing.T) {
 	})
 
 	t.Run("set valid", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"MqttFingerprint":"AA BB CC DD EE FF"}`))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		err := client.SetMQTTFingerprint(context.Background(), "AA BB CC DD EE FF")
@@ -535,15 +535,15 @@ func TestClient_MQTTRetry(t *testing.T) {
 	t.Run("get", func(t *testing.T) {
 		mockResponse := `{"MqttRetry":30}`
 
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(mockResponse))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		retry, err := client.GetMQTTRetry(context.Background())
@@ -556,15 +556,15 @@ func TestClient_MQTTRetry(t *testing.T) {
 	})
 
 	t.Run("set valid", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"MqttRetry":60}`))
 		}))
-		defer server.Close()
 
+		httpClient := server.Client()
 		client := &Client{
 			baseURL:    server.URL,
-			httpClient: server.Client(),
+			httpClient: httpClient,
 		}
 
 		err := client.SetMQTTRetry(context.Background(), 60)
@@ -611,15 +611,15 @@ func TestClient_TestMQTTConnection(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.mockResponse))
 			}))
-			defer server.Close()
 
+			httpClient := server.Client()
 			client := &Client{
 				baseURL:    server.URL,
-				httpClient: server.Client(),
+				httpClient: httpClient,
 			}
 
 			err := client.TestMQTTConnection(context.Background())
