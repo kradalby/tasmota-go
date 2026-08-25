@@ -72,7 +72,7 @@
             gofumpt
             delve
             prek
-            nixpkgs-fmt
+            nixfmt
           ];
 
           shellHook = ''
