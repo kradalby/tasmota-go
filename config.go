@@ -251,7 +251,7 @@ func (c *Client) GetModule(ctx context.Context) (int, error) {
 
 // SetOption sets a device option.
 // Tasmota has many SetOption commands (0-150+) that control various behaviors.
-func (c *Client) SetOption(ctx context.Context, option int, value interface{}) error {
+func (c *Client) SetOption(ctx context.Context, option int, value any) error {
 	if option < 0 {
 		return NewError(ErrorTypeCommand, "option number cannot be negative", nil)
 	}

@@ -165,7 +165,7 @@ func (c *Client) GetCurrentPower(ctx context.Context) (float64, error) {
 	var result struct {
 		StatusSNS struct {
 			Energy struct {
-				Power interface{} `json:"Power"`
+				Power any `json:"Power"`
 			} `json:"ENERGY"`
 		} `json:"StatusSNS"`
 	}
