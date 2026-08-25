@@ -288,7 +288,7 @@ direnv allow
 ```
 
 The development shell includes:
-- Go 1.25
+- Go 1.27 (via `go_latest`)
 - golangci-lint
 - gopls (Go language server)
 - delve (debugger)
