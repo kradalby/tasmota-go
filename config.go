@@ -3,6 +3,7 @@ package tasmota
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -224,15 +225,8 @@ func (c *Client) Restart(ctx context.Context, reason RestartReason) error {
 // Reset resets device configuration to defaults.
 // Use one of the ResetLevel* constants (ResetLevelRelay, ResetLevelAll, etc.).
 func (c *Client) Reset(ctx context.Context, level ResetLevel) error {
-	validLevels := []int{1, 2, 3, 4, 5, 6, 99}
-	valid := false
-	for _, v := range validLevels {
-		if level == ResetLevel(v) {
-			valid = true
-			break
-		}
-	}
-	if !valid {
+	validLevels := []ResetLevel{1, 2, 3, 4, 5, 6, 99}
+	if !slices.Contains(validLevels, level) {
 		return NewError(ErrorTypeCommand, "invalid reset level", nil)
 	}
 	cmd := fmt.Sprintf("Reset %d", level)
