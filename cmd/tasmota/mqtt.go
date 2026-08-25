@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kradalby/tasmota-go"
 	"github.com/peterbourgon/ff/v3/ffcli"
+
+	"github.com/kradalby/tasmota-go"
 )
 
 func newMQTTCmd(host, username, password *string, timeout *time.Duration, debug *bool) *ffcli.Command {
