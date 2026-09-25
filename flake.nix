@@ -97,6 +97,7 @@
           tasmota = {
             type = "app";
             program = "${self.packages.${system}.tasmota-cli}/bin/tasmota";
+            meta.description = "CLI tool for controlling Tasmota devices";
           };
 
           default = self.apps.${system}.tasmota;
