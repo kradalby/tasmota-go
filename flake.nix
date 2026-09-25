@@ -18,7 +18,7 @@
     }:
     {
       overlays.default = final: prev: {
-        tasmota = self.packages.${prev.system}.default;
+        tasmota = self.packages.${prev.stdenv.hostPlatform.system}.default;
       };
     }
     // flake-utils.lib.eachDefaultSystem (
