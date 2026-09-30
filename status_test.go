@@ -2,6 +2,7 @@ package tasmota
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -178,6 +179,79 @@ func TestClient_GetDeviceInfo(t *testing.T) {
 	}
 	if info.Topic != "tasmota_test" {
 		t.Errorf("Topic = %v, want tasmota_test", info.Topic)
+	}
+}
+
+// Shape of Status 0 as current firmware formats it (support_command.ino).
+func TestClient_GetDeviceInfo_BinaryPower(t *testing.T) {
+	mockResponse := `{"Status":{"Module":1,"DeviceName":"Tasmota","FriendlyName":["Tasmota"],` +
+		`"Topic":"tasmota_ABC123","ButtonTopic":"0","Power":"0101","PowerLock":"0000",` +
+		`"PowerOnState":3,"LedState":1,"LedMask":"FFFF","SaveData":1,"SaveState":1,` +
+		`"SwitchTopic":"0","SwitchMode":[0,0,0,0,0,0,0,0],"ButtonRetain":0,"SwitchRetain":0,` +
+		`"SensorRetain":0,"PowerRetain":0,"InfoRetain":0,"StateRetain":0,"StatusRetain":0}}`
+
+	server := httptest.NewTestServer(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(mockResponse))
+	}))
+
+	client := &Client{baseURL: server.URL, httpClient: server.Client()}
+
+	info, err := client.GetDeviceInfo(context.Background())
+	if err != nil {
+		t.Fatalf("GetDeviceInfo() error: %v", err)
+	}
+	if info.Topic != "tasmota_ABC123" {
+		t.Errorf("Topic = %v, want tasmota_ABC123", info.Topic)
+	}
+	for relay, want := range map[int]bool{1: true, 2: false, 3: true, 4: false} {
+		if got := info.Power.IsOn(relay); got != want {
+			t.Errorf("Power.IsOn(%d) = %v, want %v", relay, got, want)
+		}
+	}
+}
+
+func TestPowerMask_UnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		in      string
+		want    PowerMask
+		wantErr bool
+	}{
+		{in: `0`, want: 0},
+		{in: `1`, want: 1},
+		{in: `5`, want: 0b101},
+		{in: `"0"`, want: 0},
+		{in: `"1"`, want: 1},
+		{in: `"10"`, want: 0b10},
+		{in: `"0101"`, want: 0b101},
+		{in: `"11111111111111111111111111111111"`, want: 0xFFFFFFFF},
+		{in: `null`, want: 0},
+		{in: `"ON"`, wantErr: true},
+		{in: `"2"`, wantErr: true},
+		{in: `-1`, wantErr: true},
+		{in: `1.5`, wantErr: true},
+		{in: `true`, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			var got PowerMask
+			err := json.Unmarshal([]byte(tt.in), &got)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("Unmarshal(%s) error = %v, wantErr %v", tt.in, err, tt.wantErr)
+			}
+			if !tt.wantErr && got != tt.want {
+				t.Errorf("Unmarshal(%s) = %b, want %b", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPowerMask_IsOn(t *testing.T) {
+	m := PowerMask(0b1000_0000_0000_0000_0000_0000_0000_0101)
+	for relay, want := range map[int]bool{-1: false, 0: false, 1: true, 2: false, 3: true, 32: true, 33: false} {
+		if got := m.IsOn(relay); got != want {
+			t.Errorf("IsOn(%d) = %v, want %v", relay, got, want)
+		}
 	}
 }
 

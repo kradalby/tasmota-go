@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -24,23 +25,59 @@ type StatusResponse struct {
 
 // StatusInfo contains basic device information (Status 0, Status 1).
 type StatusInfo struct {
-	Module       int      `json:"Module"`
-	DeviceName   string   `json:"DeviceName"`
-	FriendlyName []string `json:"FriendlyName"`
-	Topic        string   `json:"Topic"`
-	ButtonTopic  string   `json:"ButtonTopic"`
-	Power        int      `json:"Power"`
-	PowerOnState int      `json:"PowerOnState"`
-	LedState     int      `json:"LedState"`
-	LedMask      string   `json:"LedMask"`
-	SaveData     int      `json:"SaveData"`
-	SaveState    int      `json:"SaveState"`
-	SwitchTopic  string   `json:"SwitchTopic"`
-	SwitchMode   []int    `json:"SwitchMode"`
-	ButtonRetain int      `json:"ButtonRetain"`
-	SwitchRetain int      `json:"SwitchRetain"`
-	SensorRetain int      `json:"SensorRetain"`
-	PowerRetain  int      `json:"PowerRetain"`
+	Module       int       `json:"Module"`
+	DeviceName   string    `json:"DeviceName"`
+	FriendlyName []string  `json:"FriendlyName"`
+	Topic        string    `json:"Topic"`
+	ButtonTopic  string    `json:"ButtonTopic"`
+	Power        PowerMask `json:"Power"`
+	PowerOnState int       `json:"PowerOnState"`
+	LedState     int       `json:"LedState"`
+	LedMask      string    `json:"LedMask"`
+	SaveData     int       `json:"SaveData"`
+	SaveState    int       `json:"SaveState"`
+	SwitchTopic  string    `json:"SwitchTopic"`
+	SwitchMode   []int     `json:"SwitchMode"`
+	ButtonRetain int       `json:"ButtonRetain"`
+	SwitchRetain int       `json:"SwitchRetain"`
+	SensorRetain int       `json:"SensorRetain"`
+	PowerRetain  int       `json:"PowerRetain"`
+}
+
+// PowerMask is the relay state bitmask of Status 0: bit n-1 is relay n, as
+// addressed by the Power<n> command.
+type PowerMask uint32
+
+// IsOn reports whether relay n (1-based, as in Power<n>) is on.
+func (m PowerMask) IsOn(relay int) bool {
+	return relay >= 1 && relay <= 32 && m&(1<<(relay-1)) != 0
+}
+
+// UnmarshalJSON accepts both encodings firmware has used: a decimal number
+// (older releases) and a binary string, relay 1 rightmost (e.g. "0101").
+// Current firmware sends the string, which a plain integer field rejects.
+func (m *PowerMask) UnmarshalJSON(b []byte) error {
+	if string(b) == "null" {
+		return nil
+	}
+	if len(b) > 0 && b[0] == '"' {
+		var s string
+		if err := json.Unmarshal(b, &s); err != nil {
+			return err
+		}
+		v, err := strconv.ParseUint(s, 2, 32)
+		if err != nil {
+			return fmt.Errorf("power mask %q: %w", s, err)
+		}
+		*m = PowerMask(v)
+		return nil
+	}
+	var v uint32
+	if err := json.Unmarshal(b, &v); err != nil {
+		return fmt.Errorf("power mask: %w", err)
+	}
+	*m = PowerMask(v)
+	return nil
 }
 
 // EthernetInfo contains ethernet interface information.
