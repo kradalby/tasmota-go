@@ -239,6 +239,19 @@ fmt.Printf("Power: %.2fW, Voltage: %.2fV, Current: %.3fA\n",
 - `GetMQTTInfo(ctx) (*StatusMQTT, error)`
 - `GetSensorData(ctx) (*SensorData, error)`
 
+`StatusInfo.Power` is a `PowerMask` (bit n-1 is relay n), not an `int`.
+Query relays with `IsOn`; `uint32(info.Power)` gives the raw mask.
+
+```go
+info, err := client.GetDeviceInfo(ctx)
+if err != nil {
+    return err
+}
+if info.Power.IsOn(2) {
+    // relay 2 is on
+}
+```
+
 ### Configuration
 
 - `GetConfig(ctx) (*DeviceConfig, error)`
