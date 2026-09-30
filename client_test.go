@@ -109,6 +109,39 @@ func TestNewClient_WithOptions(t *testing.T) {
 		}
 	})
 
+	// The caller's client may be shared (even http.DefaultClient), so the
+	// timeout must land on a copy, whichever order the options come in.
+	t.Run("timeout with custom http client", func(t *testing.T) {
+		const timeout = 3 * time.Second
+		orders := map[string]func(*http.Client) []ClientOption{
+			"client then timeout": func(hc *http.Client) []ClientOption {
+				return []ClientOption{WithHTTPClient(hc), WithTimeout(timeout)}
+			},
+			"timeout then client": func(hc *http.Client) []ClientOption {
+				return []ClientOption{WithTimeout(timeout), WithHTTPClient(hc)}
+			},
+		}
+		for name, opts := range orders {
+			t.Run(name, func(t *testing.T) {
+				transport := &http.Transport{}
+				custom := &http.Client{Timeout: time.Second, Transport: transport}
+				client, err := NewClient("192.168.1.100", opts(custom)...)
+				if err != nil {
+					t.Fatalf("NewClient() error: %v", err)
+				}
+				if custom.Timeout != time.Second {
+					t.Errorf("caller's client timeout = %v, want unchanged %v", custom.Timeout, time.Second)
+				}
+				if client.httpClient.Timeout != timeout {
+					t.Errorf("timeout = %v, want %v", client.httpClient.Timeout, timeout)
+				}
+				if client.httpClient.Transport != transport {
+					t.Error("transport of custom http client not kept")
+				}
+			})
+		}
+	})
+
 	t.Run("with logger", func(t *testing.T) {
 		logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 		client, err := NewClient("192.168.1.100", WithLogger(logger))
