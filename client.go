@@ -28,6 +28,7 @@ type Client struct {
 	username   string
 	password   string
 	logger     *slog.Logger
+	timeout    *time.Duration
 }
 
 // ClientOption is a functional option for configuring the Client.
@@ -41,10 +42,11 @@ func WithAuth(username, password string) ClientOption {
 	}
 }
 
-// WithTimeout configures the HTTP client timeout.
+// WithTimeout configures the HTTP client timeout. It takes effect regardless
+// of option order and never modifies a client passed to WithHTTPClient.
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(c *Client) {
-		c.httpClient.Timeout = timeout
+		c.timeout = &timeout
 	}
 }
 
@@ -92,6 +94,14 @@ func NewClient(host string, opts ...ClientOption) (*Client, error) {
 	// Apply options
 	for _, opt := range opts {
 		opt(client)
+	}
+
+	// Set on a copy: the client from WithHTTPClient may be shared, even
+	// http.DefaultClient.
+	if client.timeout != nil {
+		hc := *client.httpClient
+		hc.Timeout = *client.timeout
+		client.httpClient = &hc
 	}
 
 	return client, nil
